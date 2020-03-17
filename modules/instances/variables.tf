@@ -31,7 +31,7 @@ variable subnet_id {}
 variable security_group_ids {}
 variable project {}
 variable architecture {}
-variable ami_name {}
+variable instance_image {}
 variable ami_id {
   description = "The AMI id to use"
   type        = string

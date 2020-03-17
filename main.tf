@@ -47,7 +47,7 @@ module "instances" {
   ssh_key        = var.ssh_key
   private_key    = var.private_key
   compiler_count = var.compiler_count
-  ami_name       = var.ami_name
+  instance_image = var.instance_image
   project        = var.project
   architecture   = var.architecture
 }
