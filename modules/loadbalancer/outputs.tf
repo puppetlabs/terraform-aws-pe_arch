@@ -1,4 +1,4 @@
 output "lb_dns_name" {
-  value       = google_compute_forwarding_rule.pe_compiler_lb.service_name
-  description = "The IP of a new Pupept Enterprise compiler LB"
+  value       = aws_elb.pe_compiler_elb.dns_name
+  description = "The DNS name of a new Puppet Enterprise compiler LB"
 }

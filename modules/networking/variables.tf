@@ -1,2 +1,3 @@
- variable id    {}
- variable allow {}
+variable id {}
+variable allow {}
+variable project {}

@@ -1,29 +1,39 @@
-# Instances to run PE MOM
-resource "google_compute_instance" "master" {
-  name         = "pe-master-${var.id}-${count.index}"
-  machine_type = "e2-standard-4"
-  count        = var.architecture == "xlarge" ? 2 : 1
-  zone         = element(var.zones, count.index)
+data "aws_ami" "centos7" {
+  most_recent = true
 
-  # Old style internal DNS easiest until Bolt inventory dynamic
-  metadata = {
-    "sshKeys" = "${var.user}:${file(var.ssh_key)}"
-    "VmDnsSetting" = "ZonalPreferred"
-    "internalDNS" = "pe-master-${var.id}-${count.index}.${element(var.zones, count.index)}.c.${var.project}.internal"
+  filter {
+    # name   = "name"
+    # values = [var.ami_name]
+    name   = "image-id"
+    values = [var.ami_id]
   }
 
-  boot_disk {
-    initialize_params {
-      image = var.instance_image
-      size  = 50
-      type  = "pd-ssd"
-    }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
   }
 
-  network_interface {
-    network = var.network
-    subnetwork = var.subnetwork
-    access_config { }
+  owners = ["679593333241"] # How to look up AMI owner ID?
+}
+
+resource "aws_key_pair" "pe_adm" {
+  key_name   = "pe_adm_${var.project}"
+  public_key = file(var.ssh_key)
+}
+
+# Instances to run PE Master
+resource "aws_instance" "master" {
+  ami                    = data.aws_ami.centos7.id
+  instance_type          = "t3.xlarge"
+  count                  = var.architecture == "xlarge" ? 2 : 1
+  key_name               = aws_key_pair.pe_adm.key_name
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = var.security_group_ids
+  tags                   = merge(var.default_tags, map("Name", "pe-master-${var.project}-${count.index}"))
+
+  root_block_device {
+    volume_size = 50
+    volume_type = "gp2"
   }
 
   # Using remote-execs on each instance deployment to ensure things are really
@@ -31,40 +41,37 @@ resource "google_compute_instance" "master" {
   # immediately connect then fail
   provisioner "remote-exec" {
     connection {
-      host = self.network_interface[0].access_config[0].nat_ip
-      type = "ssh"
-      user = var.user
+      host        = self.public_ip
+      type        = "ssh"
+      user        = var.user
+      private_key = file(var.private_key)
     }
     inline = ["# Connected"]
   }
+
 }
 
 # Instances to run PE PSQL
-resource "google_compute_instance" "psql" {
-  name         = "pe-psql-${var.id}-${count.index}"
-  machine_type = "e2-standard-8"
-  count        = var.architecture == "xlarge" ? 2 : 0
-  zone         = element(var.zones, count.index)
+resource "aws_instance" "psql" {
+  ami                    = data.aws_ami.centos7.id
+  instance_type          = "t3.2xlarge"
+  count                  = var.architecture == "xlarge" ? 2 : 0
+  key_name               = aws_key_pair.pe_adm.key_name
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = var.security_group_ids
+  tags                   = merge(var.default_tags, map("Name", "pe-psql-${var.project}-${count.index}"))
 
+  # zone          = element(var.zones, count.index)
   # Old style internal DNS easiest until Bolt inventory dynamic
-  metadata = {
-    "sshKeys" = "${var.user}:${file(var.ssh_key)}"
-    "VmDnsSetting" = "ZonalPreferred"
-    "internalDNS" = "pe-psql-${var.id}-${count.index}.${element(var.zones, count.index)}.c.${var.project}.internal"
-  }
+  # metadata = {
+  #   "sshKeys"      = "${var.user}:${file(var.ssh_key)}"
+  #   "VmDnsSetting" = "ZonalPreferred"
+  #   "internalDNS"  = "pe-psql-${var.id}-${count.index}.${element(var.zones, count.index)}.c.${var.project}.internal"
+  # }
 
-  boot_disk {
-    initialize_params {
-      image = var.instance_image
-      size  = 100
-      type  = "pd-ssd"
-    }
-  }
-
-  network_interface {
-    network = var.network
-    subnetwork = var.subnetwork
-    access_config { }
+  root_block_device {
+    volume_size = 100
+    volume_type = "gp2"
   }
 
   # Using remote-execs on each instance deployment to ensure things are really
@@ -72,40 +79,38 @@ resource "google_compute_instance" "psql" {
   # immediately connect then fail
   provisioner "remote-exec" {
     connection {
-      host = self.network_interface[0].access_config[0].nat_ip
-      type = "ssh"
-      user = var.user
+      host        = self.public_ip
+      type        = "ssh"
+      user        = var.user
+      private_key = file(var.private_key)
     }
     inline = ["# Connected"]
   }
+
 }
 
 # Instances to run a compilers
-resource "google_compute_instance" "compiler" {
-  name         = "pe-compiler-${var.id}-${count.index}"
-  machine_type = "e2-standard-2"
-  count        = var.compiler_count
-  zone         = element(var.zones, count.index)
+resource "aws_instance" "compiler" {
+  ami                    = data.aws_ami.centos7.id
+  instance_type          = "t3.xlarge"
+  count                  = var.compiler_count
+  key_name               = aws_key_pair.pe_adm.key_name
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = var.security_group_ids
+  tags                   = merge(var.default_tags, map("Name", "pe-compiler-${var.project}-${count.index}"))
+  # vpc_security_group_ids = list()
+  # zone          = element(var.zones, count.index)
 
   # Old style internal DNS easiest until Bolt inventory dynamic
-  metadata = {
-    "sshKeys" = "${var.user}:${file(var.ssh_key)}"
-    "VmDnsSetting" = "ZonalPreferred"
-    "internalDNS" = "pe-compiler-${var.id}-${count.index}.${element(var.zones, count.index)}.c.${var.project}.internal"
-  }
+  # metadata = {
+  #   "sshKeys"      = "${var.user}:${file(var.ssh_key)}"
+  #   "VmDnsSetting" = "ZonalPreferred"
+  #   "internalDNS"  = "pe-compiler-${var.id}-${count.index}.${element(var.zones, count.index)}.c.${var.project}.internal"
+  # }
 
-  boot_disk {
-    initialize_params {
-      image = var.instance_image
-      size  = 15
-      type  = "pd-ssd"
-    }
-  }
-
-  network_interface {
-    network = var.network
-    subnetwork = var.subnetwork
-    access_config { }
+  root_block_device {
+    volume_size = 15
+    volume_type = "gp2"
   }
 
   # Using remote-execs on each instance deployment to ensure things are really
@@ -113,10 +118,12 @@ resource "google_compute_instance" "compiler" {
   # immediately connect then fail
   provisioner "remote-exec" {
     connection {
-      host = self.network_interface[0].access_config[0].nat_ip
+      host = self.public_ip
       type = "ssh"
       user = var.user
+      # private_key = file(var.private_key)
     }
     inline = ["# Connected"]
   }
+
 }
