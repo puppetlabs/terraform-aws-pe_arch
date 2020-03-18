@@ -4,7 +4,7 @@ output "console" {
   value       = module.instances.console
   description = "This will by the external IP address assigned to the Puppet Enterprise console"
 }
-# output "pool" {
-#   value       = module.loadbalancer.lb_dns_name
-#   description = "The GCP internal network FQDN of the Puppet Enterprise compiler pool"
-# }
+output "pool" {
+  value       = module.loadbalancer.lb_dns_name
+  description = "The GCP internal network FQDN of the Puppet Enterprise compiler pool"
+}
