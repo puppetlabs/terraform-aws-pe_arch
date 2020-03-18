@@ -29,7 +29,7 @@ resource "aws_instance" "master" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_id
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, map("Name", "pe-master-${var.project}-${count.index}"))
+  tags                   = merge(var.default_tags, map("Name", "pe-master-${var.project}-${count.index}-${var.id}"))
 
   root_block_device {
     volume_size = 50
@@ -59,7 +59,7 @@ resource "aws_instance" "psql" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_id
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, map("Name", "pe-psql-${var.project}-${count.index}"))
+  tags                   = merge(var.default_tags, map("Name", "pe-psql-${var.project}-${count.index}-${var.id}"))
 
   # zone          = element(var.zones, count.index)
   # Old style internal DNS easiest until Bolt inventory dynamic
@@ -97,7 +97,7 @@ resource "aws_instance" "compiler" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_id
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, map("Name", "pe-compiler-${var.project}-${count.index}"))
+  tags                   = merge(var.default_tags, map("Name", "pe-compiler-${var.project}-${count.index}-${var.id}"))
   # vpc_security_group_ids = list()
   # zone          = element(var.zones, count.index)
 
