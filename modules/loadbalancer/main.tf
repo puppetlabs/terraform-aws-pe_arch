@@ -3,20 +3,19 @@ resource "aws_elb" "pe_compiler_elb" {
   subnets         = var.subnet_ids
   security_groups = var.security_group_ids
 
-  listener {
-    instance_port     = 8140
-    instance_protocol = "http"
-    lb_port           = 8140
-    lb_protocol       = "http"
+  dynamic "listener" {
+    for_each = toset(var.ports)
+
+    content {
+      instance_port     = listener.value
+      instance_protocol = "tcp"
+      lb_port           = listener.value
+      lb_protocol       = "tcp"
+    }
   }
 
-  listener {
-    instance_port     = 8142
-    instance_protocol = "http"
-    lb_port           = 8142
-    lb_protocol       = "http"
-  }
-
+  # TODO This is actually not the correct healthcheck
+  # The healthcheck should use the puppetserver's status endpoint
   health_check {
     healthy_threshold   = 2
     unhealthy_threshold = 2
@@ -35,40 +34,3 @@ resource "aws_elb" "pe_compiler_elb" {
     Name = "pe_compiler_elb_${var.project}_${var.id}"
   }
 }
-/*
-resource "google_compute_instance_group" "backend" {
-  for_each = toset(var.zones)
-  name     = "pe-compiler-${var.id}"
-
-  instances = [for i in var.instances : i.self_link if i.zone == each.value]
-  zone      = each.value
-}
-
-resource "google_compute_health_check" "pe_compiler" {
-  name = "pe-compiler-${var.id}"
-
-  tcp_health_check { port = var.ports[0] }
-}
-
-resource "google_compute_region_backend_service" "pe_compiler_lb" {
-  name          = "pe-compiler-lb-${var.id}"
-  health_checks = [google_compute_health_check.pe_compiler.self_link]
-  region        = var.region
-
-  dynamic "backend" {
-    for_each = toset(var.zones)
-
-    content { group = google_compute_instance_group.backend[backend.value].self_link }
-  }
-}
-
-resource "google_compute_forwarding_rule" "pe_compiler_lb" {
-  name                  = "pe-compiler-lb-${var.id}"
-  service_label         = "puppet"
-  load_balancing_scheme = "INTERNAL"
-  ports                 = var.ports
-  network               = var.network
-  subnetwork            = var.subnetwork
-  backend_service       = google_compute_region_backend_service.pe_compiler_lb.self_link
-}
-*/
