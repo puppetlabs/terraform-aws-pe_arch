@@ -5,6 +5,8 @@ locals {
   }
 }
 
+data "aws_availability_zones" "available" {}
+
 resource "aws_vpc" "pe" {
   cidr_block           = "10.138.0.0/16"
   enable_dns_support   = true
@@ -21,11 +23,16 @@ resource "aws_internet_gateway" "pe_gw" {
 
 #TODO implement a subnet per availability zone
 resource "aws_subnet" "pe_subnet" {
-  vpc_id                  = aws_vpc.pe.id
-  cidr_block              = "10.138.1.0/24"
+  vpc_id            = aws_vpc.pe.id
+  count             = length(data.aws_availability_zones.available.names)
+  availability_zone = data.aws_availability_zones.available.names[count.index]
+
+  cidr_block              = "10.138.${1 + count.index}.0/24"
   map_public_ip_on_launch = true
 
-  tags = local.name_tag
+  tags = {
+    Name = "pe-${var.project}-${var.id}-${data.aws_availability_zones.available.names[count.index]}"
+  }
 }
 
 resource "aws_route_table" "pe_public" {
@@ -38,7 +45,8 @@ resource "aws_route_table" "pe_public" {
 }
 
 resource "aws_route_table_association" "pe_subnet_public" {
-  subnet_id      = aws_subnet.pe_subnet.id
+  count          = length(aws_subnet.pe_subnet)
+  subnet_id      = aws_subnet.pe_subnet[count.index].id
   route_table_id = aws_route_table.pe_public.id
 }
 

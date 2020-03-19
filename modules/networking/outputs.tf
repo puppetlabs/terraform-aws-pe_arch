@@ -10,8 +10,8 @@ output "vpc_id" {
   value = aws_vpc.pe.id
 }
 
-output "subnet_id" {
-  value = aws_subnet.pe_subnet.id
+output "subnet_ids" {
+  value = aws_subnet.pe_subnet[*].id
 }
 
 output "security_group_ids" {

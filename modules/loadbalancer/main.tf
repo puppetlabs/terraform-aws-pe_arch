@@ -1,6 +1,6 @@
 resource "aws_elb" "pe_compiler_elb" {
   name            = "pe-compiler-elb-${var.project}-${var.id}"
-  subnets         = [var.subnet_id]
+  subnets         = var.subnet_ids
   security_groups = var.security_group_ids
 
   listener {

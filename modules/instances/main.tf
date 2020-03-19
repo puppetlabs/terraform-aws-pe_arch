@@ -27,7 +27,7 @@ resource "aws_instance" "master" {
   instance_type          = "t3.xlarge"
   count                  = var.architecture == "xlarge" ? 2 : 1
   key_name               = aws_key_pair.pe_adm.key_name
-  subnet_id              = var.subnet_id
+  subnet_id              = var.subnet_ids[count.index]
   vpc_security_group_ids = var.security_group_ids
   tags                   = merge(var.default_tags, map("Name", "pe-master-${var.project}-${count.index}-${var.id}"))
 
@@ -57,7 +57,7 @@ resource "aws_instance" "psql" {
   instance_type          = "t3.2xlarge"
   count                  = var.architecture == "xlarge" ? 2 : 0
   key_name               = aws_key_pair.pe_adm.key_name
-  subnet_id              = var.subnet_id
+  subnet_id              = var.subnet_ids[count.index]
   vpc_security_group_ids = var.security_group_ids
   tags                   = merge(var.default_tags, map("Name", "pe-psql-${var.project}-${count.index}-${var.id}"))
 
@@ -95,7 +95,7 @@ resource "aws_instance" "compiler" {
   instance_type          = "t3.xlarge"
   count                  = var.compiler_count
   key_name               = aws_key_pair.pe_adm.key_name
-  subnet_id              = var.subnet_id
+  subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
   tags                   = merge(var.default_tags, map("Name", "pe-compiler-${var.project}-${count.index}-${var.id}"))
   # vpc_security_group_ids = list()

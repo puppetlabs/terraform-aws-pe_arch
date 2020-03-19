@@ -27,7 +27,7 @@ variable "compiler_count" {
 # variable subnetwork {}
 variable id {}
 variable vpc_id {}
-variable subnet_id {}
+variable subnet_ids {}
 variable security_group_ids {}
 variable project {}
 variable architecture {}
