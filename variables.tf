@@ -31,7 +31,7 @@ variable "zones" {
 variable "compiler_count" {
   description = "The quantity of compilers that are deployed behind a load balancer and will be spread across defined zones"
   type        = number
-  default     = 1
+  default     = 3
 }
 variable "instance_image" {
   description = "The AMI name pattern to use when deploying new cloud instances"
