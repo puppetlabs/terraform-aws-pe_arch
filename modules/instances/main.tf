@@ -1,11 +1,14 @@
+# This datasource will produce the most recent AMI
+# with the name pattern as provided in var.instance_image
+# and owner as specified.
+# To use AMIs by this owner, an EULA has to be acccepted once
+# using the AWS Console.
 data "aws_ami" "centos7" {
   most_recent = true
 
   filter {
-    # name   = "name"
-    # values = [var.ami_name]
-    name   = "image-id"
-    values = [var.ami_id]
+    name   = "name"
+    values = [var.instance_image]
   }
 
   filter {
@@ -39,16 +42,18 @@ resource "aws_instance" "master" {
   # Using remote-execs on each instance deployment to ensure things are really
   # really up before doing to the next step, helps with Bolt plans that'll
   # immediately connect then fail
+  # NOTE: you will need to add your private key corresponding to `ssh_key` 
+  # to the ssh agent like so:
+  # $ eval `ssh-agent`
+  # $ ssh-add
   provisioner "remote-exec" {
     connection {
-      host        = self.public_ip
-      type        = "ssh"
-      user        = var.user
-      private_key = file(var.private_key)
+      host = self.public_ip
+      type = "ssh"
+      user = var.user
     }
     inline = ["# Connected"]
   }
-
 }
 
 # Instances to run PE PSQL
@@ -61,14 +66,6 @@ resource "aws_instance" "psql" {
   vpc_security_group_ids = var.security_group_ids
   tags                   = merge(var.default_tags, map("Name", "pe-psql-${var.project}-${count.index}-${var.id}"))
 
-  # zone          = element(var.zones, count.index)
-  # Old style internal DNS easiest until Bolt inventory dynamic
-  # metadata = {
-  #   "sshKeys"      = "${var.user}:${file(var.ssh_key)}"
-  #   "VmDnsSetting" = "ZonalPreferred"
-  #   "internalDNS"  = "pe-psql-${var.id}-${count.index}.${element(var.zones, count.index)}.c.${var.project}.internal"
-  # }
-
   root_block_device {
     volume_size = 100
     volume_type = "gp2"
@@ -77,12 +74,15 @@ resource "aws_instance" "psql" {
   # Using remote-execs on each instance deployment to ensure things are really
   # really up before doing to the next step, helps with Bolt plans that'll
   # immediately connect then fail
+  # NOTE: you will need to add your private key corresponding to `ssh_key` 
+  # to the ssh agent like so:
+  # $ eval `ssh-agent`
+  # $ ssh-add
   provisioner "remote-exec" {
     connection {
-      host        = self.public_ip
-      type        = "ssh"
-      user        = var.user
-      private_key = file(var.private_key)
+      host = self.public_ip
+      type = "ssh"
+      user = var.user
     }
     inline = ["# Connected"]
   }
@@ -116,12 +116,15 @@ resource "aws_instance" "compiler" {
   # Using remote-execs on each instance deployment to ensure things are really
   # really up before doing to the next step, helps with Bolt plans that'll
   # immediately connect then fail
+  # NOTE: you will need to add your private key corresponding to `ssh_key` 
+  # to the ssh agent like so:
+  # $ eval `ssh-agent`
+  # $ ssh-add
   provisioner "remote-exec" {
     connection {
       host = self.public_ip
       type = "ssh"
       user = var.user
-      # private_key = file(var.private_key)
     }
     inline = ["# Connected"]
   }
