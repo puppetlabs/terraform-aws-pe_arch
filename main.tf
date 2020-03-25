@@ -14,7 +14,6 @@ module "networking" {
   source  = "./modules/networking"
   id      = random_id.deployment.hex
   project = var.project
-  allow   = var.firewall_allow
 }
 
 # Contain all the loadbalancer configuration in a module for readability
@@ -31,6 +30,11 @@ module "loadbalancer" {
 
 # Instance module called from a dynamic source dependent on deploying 
 # architecture
+# 
+# NOTE: you will need to add your private key corresponding to `ssh_key` 
+# to the ssh agent like so:
+# $ eval `ssh-agent`
+# $ ssh-add
 module "instances" {
   source             = "./modules/instances"
   vpc_id             = module.networking.vpc_id
@@ -39,7 +43,6 @@ module "instances" {
   id                 = random_id.deployment.hex
   user               = var.user
   ssh_key            = var.ssh_key
-  private_key        = var.private_key
   compiler_count     = var.compiler_count
   instance_image     = var.instance_image
   project            = var.project
