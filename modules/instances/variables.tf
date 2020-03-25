@@ -11,20 +11,11 @@ variable "ssh_key" {
   type        = string
   default     = "~/.ssh/id_rsa.pub"
 }
-variable "private_key" {}
-
-variable "zones" {
-  description = "GCP zone that are within the defined GCP region that you wish to use"
-  type        = list(string)
-  default     = ["us-west1-a", "us-west1-b", "us-west1-c"]
-}
 variable "compiler_count" {
   description = "The quantity of compilers that are deployed behind a load balancer and will be spread across defined zones"
   type        = number
   default     = 3
 }
-# variable network {}
-# variable subnetwork {}
 variable id {}
 variable vpc_id {}
 variable subnet_ids {}
@@ -32,11 +23,7 @@ variable security_group_ids {}
 variable project {}
 variable architecture {}
 variable instance_image {}
-variable ami_id {
-  description = "The AMI id to use"
-  type        = string
-  default     = "ami-04cf43aca3e6f3de3"
-}
+# The default tags are needed to prevent Puppet AWS reaper from reaping the instances
 variable default_tags {
   description = "The default instance tags"
   type        = map
