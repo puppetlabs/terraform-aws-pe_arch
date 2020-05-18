@@ -1,3 +1,10 @@
+# The module makes repeated use of the try() function so requires a very recent
+# release of Terraform 0.12
+terraform {
+  required_version = ">= 0.12.20"
+  experiments      = [variable_validation]
+}
+
 provider "aws" {
   version = "~> 2.0"
   region  = var.region
@@ -26,6 +33,7 @@ module "loadbalancer" {
   project            = var.project
   region             = var.region
   instances          = module.instances.compilers
+  architecture       = var.architecture
 }
 
 # Instance module called from a dynamic source dependent on deploying 
@@ -44,6 +52,7 @@ module "instances" {
   user               = var.user
   ssh_key            = var.ssh_key
   compiler_count     = var.compiler_count
+  node_count         = var.node_count
   instance_image     = var.instance_image
   project            = var.project
   architecture       = var.architecture

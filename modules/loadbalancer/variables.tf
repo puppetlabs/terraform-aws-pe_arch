@@ -5,3 +5,4 @@ variable security_group_ids {}
 variable region {}
 variable instances {}
 variable project {}
+variable architecture {}

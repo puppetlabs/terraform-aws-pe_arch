@@ -1,8 +1,8 @@
-# This datasource will produce the most recent AMI
-# with the name pattern as provided in var.instance_image
-# and owner as specified.
-# To use AMIs by this owner, an EULA has to be acccepted once
-# using the AWS Console.
+# This data source will produce the most recent AMI with the name pattern as
+# provided in var.instance_image and owner as specified.
+#
+# To use AMIs by this owner, an EULA has to be accepted once using the AWS
+# Console.
 data "aws_ami" "centos7" {
   most_recent = true
 
@@ -48,9 +48,9 @@ resource "aws_instance" "master" {
   # $ ssh-add
   provisioner "remote-exec" {
     connection {
-      host = self.public_ip
-      type = "ssh"
-      user = var.user
+      host        = self.public_ip
+      type        = "ssh"
+      user        = var.user
     }
     inline = ["# Connected"]
   }
@@ -80,9 +80,9 @@ resource "aws_instance" "psql" {
   # $ ssh-add
   provisioner "remote-exec" {
     connection {
-      host = self.public_ip
-      type = "ssh"
-      user = var.user
+      host        = self.public_ip
+      type        = "ssh"
+      user        = var.user
     }
     inline = ["# Connected"]
   }
@@ -93,20 +93,13 @@ resource "aws_instance" "psql" {
 resource "aws_instance" "compiler" {
   ami                    = data.aws_ami.centos7.id
   instance_type          = "t3.xlarge"
-  count                  = var.compiler_count
+  count                  = var.architecture == "standard" ? 0 : var.compiler_count
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
   tags                   = merge(var.default_tags, map("Name", "pe-compiler-${var.project}-${count.index}-${var.id}"))
   # vpc_security_group_ids = list()
   # zone          = element(var.zones, count.index)
-
-  # Old style internal DNS easiest until Bolt inventory dynamic
-  # metadata = {
-  #   "sshKeys"      = "${var.user}:${file(var.ssh_key)}"
-  #   "VmDnsSetting" = "ZonalPreferred"
-  #   "internalDNS"  = "pe-compiler-${var.id}-${count.index}.${element(var.zones, count.index)}.c.${var.project}.internal"
-  # }
 
   root_block_device {
     volume_size = 15
@@ -122,11 +115,10 @@ resource "aws_instance" "compiler" {
   # $ ssh-add
   provisioner "remote-exec" {
     connection {
-      host = self.public_ip
-      type = "ssh"
-      user = var.user
+      host        = self.public_ip
+      type        = "ssh"
+      user        = var.user
     }
     inline = ["# Connected"]
   }
-
 }
