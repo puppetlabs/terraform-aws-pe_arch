@@ -2,7 +2,6 @@
 # release of Terraform 0.12
 terraform {
   required_version = ">= 0.12.20"
-  experiments      = [variable_validation]
 }
 
 provider "aws" {
@@ -36,12 +35,11 @@ module "loadbalancer" {
   architecture       = var.architecture
 }
 
-# Instance module called from a dynamic source dependent on deploying 
-# architecture
+# Contain all the instances configuration in a module for readability
 # 
 # NOTE: you will need to add your private key corresponding to `ssh_key` 
 # to the ssh agent like so:
-# $ eval `ssh-agent`
+# $ eval $(ssh-agent)
 # $ ssh-add
 module "instances" {
   source             = "./modules/instances"

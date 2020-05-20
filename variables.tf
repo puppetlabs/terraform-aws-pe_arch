@@ -21,21 +21,11 @@ variable "compiler_count" {
   description = "The quantity of compilers that are deployed behind a load balancer and will be spread across defined zones"
   type        = number
   default     = 3
-
-  validation {
-    condition     = var.compiler_count >= 3
-    error_message = "The compiler_count variable must be greater or equal to 3."
-  }
 }
 variable "node_count" {
   description = "The quantity of nodes that are deployed within the environment for testing"
   type        = number
   default     = 0
-
-  validation {
-    condition     = length(regexall("^[[:digit:]]+.[[:digit:]]+$", tostring(var.node_count / 3))) == 0
-    error_message = "The node_count variable must be divisible by 3."
-  }
 }
 # Note that you might need to accept the AWS EULA for the AMI product used here
 variable "instance_image" {

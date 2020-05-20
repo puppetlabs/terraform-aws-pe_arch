@@ -24,7 +24,11 @@ resource "aws_key_pair" "pe_adm" {
   public_key = file(var.ssh_key)
 }
 
-# Instances to run PE Master
+# In both large and standard we only require a single Master but under a
+# standard architecture the instance will also serve catalogs as a Compiler in
+# addition to hosting all other core services. Currently we are assuming extra
+# large architectures include a Master Replica so need to deploy two identical
+# instances to have something failover to
 resource "aws_instance" "master" {
   ami                    = data.aws_ami.centos7.id
   instance_type          = "t3.xlarge"
@@ -42,9 +46,10 @@ resource "aws_instance" "master" {
   # Using remote-execs on each instance deployment to ensure things are really
   # really up before doing to the next step, helps with Bolt plans that'll
   # immediately connect then fail
+  #
   # NOTE: you will need to add your private key corresponding to `ssh_key` 
   # to the ssh agent like so:
-  # $ eval `ssh-agent`
+  # $ eval $(ssh-agent)
   # $ ssh-add
   provisioner "remote-exec" {
     connection {
@@ -56,10 +61,15 @@ resource "aws_instance" "master" {
   }
 }
 
-# Instances to run PE PSQL
+# The biggest infrastructure difference to account for between large and extra
+# large is externalization of the database service. Again given out assumption
+# that extra large currently also means "with replica", we deploy two identical
+# hosts in extra large but nothing in the other two architectures
 resource "aws_instance" "psql" {
   ami                    = data.aws_ami.centos7.id
   instance_type          = "t3.2xlarge"
+  # count is used to effectively "no-op" this resource in the event that we
+  # deploy any architecture other than xlarge
   count                  = var.architecture == "xlarge" ? 2 : 0
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index]
@@ -74,6 +84,46 @@ resource "aws_instance" "psql" {
   # Using remote-execs on each instance deployment to ensure things are really
   # really up before doing to the next step, helps with Bolt plans that'll
   # immediately connect then fail
+  #
+  # NOTE: you will need to add your private key corresponding to `ssh_key` 
+  # to the ssh agent like so:
+  # $ eval $(ssh-agent)
+  # $ ssh-add
+  provisioner "remote-exec" {
+    connection {
+      host        = self.public_ip
+      type        = "ssh"
+      user        = var.user
+    }
+    inline = ["# Connected"]
+  }
+}
+
+# The defining difference between standard and other architectures is the
+# presence of load balanced instances with the sole duty of compiling catalogs
+# for agents. A user chosen number of Compilers will be deployed in large and
+# extra large but only ever zero can be deployed when the operating mode is set
+# to standard
+resource "aws_instance" "compiler" {
+  ami                    = data.aws_ami.centos7.id
+  instance_type          = "t3.xlarge"
+  # count is used to effectively "no-op" this resource in the event that we
+  # deploy the standard architecture
+  count                  = var.architecture == "standard" ? 0 : var.compiler_count
+  key_name               = aws_key_pair.pe_adm.key_name
+  subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
+  vpc_security_group_ids = var.security_group_ids
+  tags                   = merge(var.default_tags, map("Name", "pe-compiler-${var.project}-${count.index}-${var.id}"))
+
+  root_block_device {
+    volume_size = 15
+    volume_type = "gp2"
+  }
+
+  # Using remote-execs on each instance deployment to ensure things are really
+  # really up before doing to the next step, helps with Bolt plans that'll
+  # immediately connect then fail
+  #
   # NOTE: you will need to add your private key corresponding to `ssh_key` 
   # to the ssh agent like so:
   # $ eval `ssh-agent`
@@ -86,20 +136,18 @@ resource "aws_instance" "psql" {
     }
     inline = ["# Connected"]
   }
-
 }
 
-# Instances to run a compilers
-resource "aws_instance" "compiler" {
+# User requested number of nodes to serve as agent nodes for when this module is
+# used to standup Puppet Enterprise for test and evaluation
+resource "aws_instance" "node" {
   ami                    = data.aws_ami.centos7.id
-  instance_type          = "t3.xlarge"
-  count                  = var.architecture == "standard" ? 0 : var.compiler_count
+  instance_type          = "t3.small"
+  count                  = var.node_count
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, map("Name", "pe-compiler-${var.project}-${count.index}-${var.id}"))
-  # vpc_security_group_ids = list()
-  # zone          = element(var.zones, count.index)
+  tags                   = merge(var.default_tags, map("Name", "pe-node-${var.project}-${count.index}-${var.id}"))
 
   root_block_device {
     volume_size = 15
@@ -109,6 +157,7 @@ resource "aws_instance" "compiler" {
   # Using remote-execs on each instance deployment to ensure things are really
   # really up before doing to the next step, helps with Bolt plans that'll
   # immediately connect then fail
+  #
   # NOTE: you will need to add your private key corresponding to `ssh_key` 
   # to the ssh agent like so:
   # $ eval `ssh-agent`
