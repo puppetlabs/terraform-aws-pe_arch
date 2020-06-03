@@ -1,4 +1,5 @@
 resource "aws_elb" "pe_compiler_elb" {
+  count         = var.architecture == "standard" ? 0 : 1
   name            = "pe-compiler-elb-${var.project}-${var.id}"
   subnets         = var.subnet_ids
   security_groups = var.security_group_ids
@@ -24,7 +25,7 @@ resource "aws_elb" "pe_compiler_elb" {
     interval            = 30
   }
 
-  instances                   = var.instances
+  instances                   = var.instances[*].id
   cross_zone_load_balancing   = true
   idle_timeout                = 400
   connection_draining         = true

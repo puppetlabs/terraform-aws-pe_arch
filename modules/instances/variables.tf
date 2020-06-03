@@ -1,7 +1,8 @@
-# variable "id" {
-#   description = "Name of GCP project that will be used for housing require infrastructure"
-#   type        = string
-# }
+# These are the variables required for the instances submodule to function
+# properly and are duplicated highly from the main module but instead do not
+# have any defaults set because this submodule should never by called from
+# anything else expect the main module where values for all these variables will
+# always be passed in
 variable "user" {
   description = "Instance user name that will used for SSH operations"
   type        = string
@@ -9,20 +10,37 @@ variable "user" {
 variable "ssh_key" {
   description = "Location on disk of the SSH public key to be used for instance SSH access"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
 }
 variable "compiler_count" {
   description = "The quantity of compilers that are deployed behind a load balancer and will be spread across defined zones"
   type        = number
-  default     = 3
 }
-variable id {}
-variable vpc_id {}
-variable subnet_ids {}
-variable security_group_ids {}
-variable project {}
-variable architecture {}
-variable instance_image {}
+variable "id" {
+  description = "Randomly generated value used to produce unique names for everything to prevent collisions and visually link resources together"
+  type        = string
+}
+variable "vpc_id" {
+  description = "ID of VPC network provisioned by the networking submodule"
+}
+variable "subnet_ids" {
+  description = "List of zonal subnet IDs provisioned by the networking submodule"
+}
+variable "security_group_ids" {
+  description = "List of SG IDs provisioned by the networking submodule"
+}
+variable "project" {
+  description = "Name of GCP project that will be used for housing require infrastructure"
+  type        = string
+}
+variable "architecture" {
+  description = "Which of the supported PE architectures modules to deploy xlarge, large, or standard"
+  type        = string
+}
+variable "instance_image" {}
+variable "node_count" {
+  description = "The quantity of nodes that are deployed within the environment for testing"
+  type        = number
+}
 # The default tags are needed to prevent Puppet AWS reaper from reaping the instances
 variable default_tags {
   description = "The default instance tags"
@@ -32,6 +50,5 @@ variable default_tags {
     department  = "SA"
     project     = "peadm - autope"
     lifetime    = "1d"
-    #termination_date: '2018-07-19T11:03:05.626507+00:00'
   }
 }

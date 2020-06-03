@@ -1,3 +1,9 @@
+# The module makes repeated use of the try() function so requires a very recent
+# release of Terraform 0.12
+terraform {
+  required_version = ">= 0.12.20"
+}
+
 provider "aws" {
   version = "~> 2.0"
   region  = var.region
@@ -26,14 +32,14 @@ module "loadbalancer" {
   project            = var.project
   region             = var.region
   instances          = module.instances.compilers
+  architecture       = var.architecture
 }
 
-# Instance module called from a dynamic source dependent on deploying 
-# architecture
+# Contain all the instances configuration in a module for readability
 # 
 # NOTE: you will need to add your private key corresponding to `ssh_key` 
 # to the ssh agent like so:
-# $ eval `ssh-agent`
+# $ eval $(ssh-agent)
 # $ ssh-add
 module "instances" {
   source             = "./modules/instances"
@@ -44,6 +50,7 @@ module "instances" {
   user               = var.user
   ssh_key            = var.ssh_key
   compiler_count     = var.compiler_count
+  node_count         = var.node_count
   instance_image     = var.instance_image
   project            = var.project
   architecture       = var.architecture
