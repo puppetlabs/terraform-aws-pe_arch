@@ -20,6 +20,7 @@ module "networking" {
   source  = "./modules/networking"
   id      = random_id.deployment.hex
   project = var.project
+  allow   = var.firewall_allow
 }
 
 # Contain all the loadbalancer configuration in a module for readability

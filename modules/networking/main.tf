@@ -58,26 +58,18 @@ resource "aws_security_group" "pe_sg" {
   vpc_id      = aws_vpc.pe.id
 
   ingress {
-    description = "SSH from everywhere"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "TLS from everywhere"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description = "General ingress rule"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1" # all protocols and ports
+    cidr_blocks = var.allow
   }
 
   ingress {
     description = "Anything from VPC"
-    from_port   = 1
-    to_port     = 65535
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1" # all protocols and ports
     cidr_blocks = list(aws_vpc.pe.cidr_block)
   }
 
@@ -87,4 +79,7 @@ resource "aws_security_group" "pe_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags          = local.name_tag
+
 }

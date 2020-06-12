@@ -38,3 +38,8 @@ variable "architecture" {
   type        = string
   default     = "large"
 }
+variable "firewall_allow" {
+  description = "List of permitted IP subnets, list most include the internal network and single addresses must be passed as a /32"
+  type        = list(string)
+  default     = []
+}

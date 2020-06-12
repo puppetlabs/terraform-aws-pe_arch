@@ -25,5 +25,5 @@
 .DS_Store
 .project
 .envrc
-.terraform
+.terraform*
 terraform*
