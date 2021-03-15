@@ -15,6 +15,14 @@ variable "compiler_count" {
   description = "The quantity of compilers that are deployed behind a load balancer and will be spread across defined zones"
   type        = number
 }
+variable "server_count" {
+  description = "The quantity of nodes that are deployed within the environment for testing"
+  type        = number
+}
+variable "database_count" {
+  description = "The quantity of nodes that are deployed within the environment for testing"
+  type        = number
+}
 variable "id" {
   description = "Randomly generated value used to produce unique names for everything to prevent collisions and visually link resources together"
   type        = string
@@ -29,14 +37,13 @@ variable "security_group_ids" {
   description = "List of SG IDs provisioned by the networking submodule"
 }
 variable "project" {
-  description = "Name of GCP project that will be used for housing require infrastructure"
+  description = "Name of project that will be used for cosmetically linking resources together"
   type        = string
 }
-variable "architecture" {
-  description = "Which of the supported PE architectures modules to deploy xlarge, large, or standard"
+variable "instance_image" {
+  description = "The disk image to use when deploying new cloud instances"
   type        = string
 }
-variable "instance_image" {}
 variable "node_count" {
   description = "The quantity of nodes that are deployed within the environment for testing"
   type        = number

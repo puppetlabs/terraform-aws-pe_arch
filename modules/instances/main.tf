@@ -24,19 +24,17 @@ resource "aws_key_pair" "pe_adm" {
   public_key = file(var.ssh_key)
 }
 
-# In both large and standard we only require a single Master but under a
+# In both large and standard we only require a single Primary but under a
 # standard architecture the instance will also serve catalogs as a Compiler in
-# addition to hosting all other core services. Currently we are assuming extra
-# large architectures include a Master Replica so need to deploy two identical
-# instances to have something failover to
-resource "aws_instance" "master" {
+# addition to hosting all other core services. 
+resource "aws_instance" "server" {
   ami                    = data.aws_ami.centos7.id
   instance_type          = "t3.xlarge"
-  count                  = var.architecture == "xlarge" ? 2 : 1
+  count                  = var.server_count
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, map("Name", "pe-master-${var.project}-${count.index}-${var.id}"))
+  tags                   = merge(var.default_tags, map("Name", "pe-server-${var.project}-${count.index}-${var.id}"))
 
   root_block_device {
     volume_size = 50
@@ -70,7 +68,7 @@ resource "aws_instance" "psql" {
   instance_type          = "t3.2xlarge"
   # count is used to effectively "no-op" this resource in the event that we
   # deploy any architecture other than xlarge
-  count                  = var.architecture == "xlarge" ? 2 : 0
+  count                  = var.database_count
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index]
   vpc_security_group_ids = var.security_group_ids
@@ -109,7 +107,7 @@ resource "aws_instance" "compiler" {
   instance_type          = "t3.xlarge"
   # count is used to effectively "no-op" this resource in the event that we
   # deploy the standard architecture
-  count                  = var.architecture == "standard" ? 0 : var.compiler_count
+  count                  = var.compiler_count
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids

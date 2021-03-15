@@ -81,5 +81,4 @@ resource "aws_security_group" "pe_sg" {
   }
 
   tags          = local.name_tag
-
 }
