@@ -25,6 +25,7 @@ Types of things you'll be paying your cloud provider for
 
 * Instances of various sizes
 * Load balancers
+* Networks
 
 ### Setup Requirements
 
