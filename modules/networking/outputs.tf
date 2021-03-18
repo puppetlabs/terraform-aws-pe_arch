@@ -1,3 +1,5 @@
+# Output data that will be used by other submodules to build other parts of the
+# stack to support defined architecture
 output "vpc_id" {
   value       = aws_vpc.pe.id
   description = "AWS VPC id"

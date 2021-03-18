@@ -1,5 +1,9 @@
+locals {
+  lb_count = var.has_lb ? 1 : 0
+}
+
 resource "aws_elb" "pe_compiler_elb" {
-  count         = var.architecture == "standard" ? 0 : 1
+  count           = local.lb_count
   name            = "pe-compiler-elb-${var.project}-${var.id}"
   subnets         = var.subnet_ids
   security_groups = var.security_group_ids

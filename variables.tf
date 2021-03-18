@@ -1,6 +1,7 @@
 variable "project" {
   description = "Name of the PE architecture project"
   type        = string
+  default     = "ape"
 }
 variable "user" {
   description = "Instance user name that will used for SSH operations"
@@ -20,7 +21,7 @@ variable "region" {
 variable "compiler_count" {
   description = "The quantity of compilers that are deployed behind a load balancer and will be spread across defined zones"
   type        = number
-  default     = 3
+  default     = 1
 }
 variable "node_count" {
   description = "The quantity of nodes that are deployed within the environment for testing"
@@ -42,4 +43,9 @@ variable "firewall_allow" {
   description = "List of permitted IP subnets, list most include the internal network and single addresses must be passed as a /32"
   type        = list(string)
   default     = []
+}
+variable "replica" {
+  description = "To deploy instances required for the provisioning of a server replica"
+  type        = bool
+  default     = false
 }

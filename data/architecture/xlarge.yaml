@@ -1,0 +1,4 @@
+---
+server_count: 1
+database_count: 1
+has_compilers: true
