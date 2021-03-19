@@ -17,6 +17,21 @@ IaC definitions for three of the supported Puppet Enterprise architectures for A
 
 This Terraform module implements as code the infrastructure required to deploy three permutations of the supported Puppet Enterprise architectures: Standard, Large, and Extra Large with a failover replica on Amazon Web Services. While this module can function independently, it is primarily developed as a component of puppetlabs/autope to facilitate the end-to-end deployment of fully functional stacks of Puppet Enterprise for evaluation or with additional guidance, production. It sets up native AWS networks and load balancers specifically for containing and managing access to the deployment but avoids a dependence on cloud provided SQL services since Puppet Enterprise has its own facilities for managing and automating PostgreSQL.
 
+### Expectations and support
+
+This Terraform module is intended to be used only by Puppet Enterprise customers actively working with and being guided by Puppet Customer Success teams—specifically, the Professional Services and Solutions Architecture teams. Independent use is not recommended for production environments without a comprehensive understanding of how Terraform works, comfort in the modification and maintenance of Terraform code, and the infrastructure requirements of a full Puppet Enterprise deployment.
+
+This Terraform module is a services-led solution, and is **NOT** supported through Puppet Enterprise's standard or premium support.puppet.com service.
+
+As a services-led solution, Puppet Enterprise customers who are advised to start using this module should get support for it through the following general process.
+
+1. Be introduced to the module through a services engagement or by their Technical Account Manager (TAM).
+2. During Professional Services (PS) engagements, the Puppet PS team will aid and instruct in use of the module.
+3. Outside of PS engagements, use TAM services to request assistance with problems encountered when using the module, and to inform Puppet Customer Success (CS) teams of planned major maintenance or upgrades for which advisory services are needed.
+4. In the absence of a TAM, your Puppet account management team (Account Executive and Solutions Engineer) may be a fallback communication option for requesting assistance, or for informing CS teams of planned major maintenance for which advisory services are needed.
+
+This module is under active development and yet to release an initial version. There is no guarantee yet on a stable interface from commit to commit and those commits may include breaking chnages.
+
 ## Setup
 
 ### What aws-pe_arch affects
