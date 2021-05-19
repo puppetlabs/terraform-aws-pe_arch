@@ -70,7 +70,7 @@ resource "aws_security_group" "pe_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1" # all protocols and ports
-    cidr_blocks = list(aws_vpc.pe.cidr_block)
+    cidr_blocks = tolist([aws_vpc.pe.cidr_block])
   }
 
   egress {

@@ -34,7 +34,7 @@ resource "aws_instance" "server" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, map("Name", "pe-server-${var.project}-${count.index}-${var.id}"))
+  tags                   = merge(var.default_tags, tomap({Name = "pe-server-${var.project}-${count.index}-${var.id}"}))
 
   root_block_device {
     volume_size = 50
@@ -72,7 +72,7 @@ resource "aws_instance" "psql" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, map("Name", "pe-psql-${var.project}-${count.index}-${var.id}"))
+  tags                   = merge(var.default_tags, tomap({Name = "pe-psql-${var.project}-${count.index}-${var.id}"}))
 
   root_block_device {
     volume_size = 100
@@ -111,7 +111,7 @@ resource "aws_instance" "compiler" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, map("Name", "pe-compiler-${var.project}-${count.index}-${var.id}"))
+  tags                   = merge(var.default_tags, tomap({Name = "pe-compiler-${var.project}-${count.index}-${var.id}"}))
 
   root_block_device {
     volume_size = 15
@@ -145,7 +145,7 @@ resource "aws_instance" "node" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, map("Name", "pe-node-${var.project}-${count.index}-${var.id}"))
+  tags                   = merge(var.default_tags, tomap({Name = "pe-node-${var.project}-${count.index}-${var.id}"}))
 
   root_block_device {
     volume_size = 15
