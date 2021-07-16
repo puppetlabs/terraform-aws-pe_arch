@@ -40,23 +40,6 @@ resource "aws_instance" "server" {
     volume_size = 50
     volume_type = "gp2"
   }
-
-  # Using remote-execs on each instance deployment to ensure things are really
-  # really up before doing to the next step, helps with Bolt plans that'll
-  # immediately connect then fail
-  #
-  # NOTE: you will need to add your private key corresponding to `ssh_key` 
-  # to the ssh agent like so:
-  # $ eval $(ssh-agent)
-  # $ ssh-add
-  provisioner "remote-exec" {
-    connection {
-      host        = self.public_ip
-      type        = "ssh"
-      user        = var.user
-    }
-    inline = ["# Connected"]
-  }
 }
 
 # The biggest infrastructure difference to account for between large and extra
@@ -77,23 +60,6 @@ resource "aws_instance" "psql" {
   root_block_device {
     volume_size = 100
     volume_type = "gp2"
-  }
-
-  # Using remote-execs on each instance deployment to ensure things are really
-  # really up before doing to the next step, helps with Bolt plans that'll
-  # immediately connect then fail
-  #
-  # NOTE: you will need to add your private key corresponding to `ssh_key` 
-  # to the ssh agent like so:
-  # $ eval $(ssh-agent)
-  # $ ssh-add
-  provisioner "remote-exec" {
-    connection {
-      host        = self.public_ip
-      type        = "ssh"
-      user        = var.user
-    }
-    inline = ["# Connected"]
   }
 }
 
@@ -117,23 +83,6 @@ resource "aws_instance" "compiler" {
     volume_size = 15
     volume_type = "gp2"
   }
-
-  # Using remote-execs on each instance deployment to ensure things are really
-  # really up before doing to the next step, helps with Bolt plans that'll
-  # immediately connect then fail
-  #
-  # NOTE: you will need to add your private key corresponding to `ssh_key` 
-  # to the ssh agent like so:
-  # $ eval `ssh-agent`
-  # $ ssh-add
-  provisioner "remote-exec" {
-    connection {
-      host        = self.public_ip
-      type        = "ssh"
-      user        = var.user
-    }
-    inline = ["# Connected"]
-  }
 }
 
 # User requested number of nodes to serve as agent nodes for when this module is
@@ -150,22 +99,5 @@ resource "aws_instance" "node" {
   root_block_device {
     volume_size = 15
     volume_type = "gp2"
-  }
-
-  # Using remote-execs on each instance deployment to ensure things are really
-  # really up before doing to the next step, helps with Bolt plans that'll
-  # immediately connect then fail
-  #
-  # NOTE: you will need to add your private key corresponding to `ssh_key` 
-  # to the ssh agent like so:
-  # $ eval `ssh-agent`
-  # $ ssh-add
-  provisioner "remote-exec" {
-    connection {
-      host        = self.public_ip
-      type        = "ssh"
-      user        = var.user
-    }
-    inline = ["# Connected"]
   }
 }
