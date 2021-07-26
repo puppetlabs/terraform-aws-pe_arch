@@ -68,6 +68,7 @@ module "networking" {
 module "loadbalancer" {
   source             = "./modules/loadbalancer"
   id                 = local.id
+  vpc_id             = module.networking.vpc_id
   ports              = ["8140", "8142"]
   security_group_ids = module.networking.security_group_ids
   subnet_ids         = module.networking.subnet_ids
@@ -75,6 +76,7 @@ module "loadbalancer" {
   region             = var.region
   instances          = module.instances.compilers
   has_lb             = local.has_lb
+  compiler_count     = local.compiler_count
 }
 
 # Contain all the instances configuration in a module for readability
