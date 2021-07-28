@@ -1,41 +1,58 @@
 locals {
   lb_count = var.has_lb ? 1 : 0
+  # When using for_each to create multiple of the same resource type the value
+  # set must be a set of strings, numbers toss an error
+  lb_ports = toset(["8140", "8142"])
 }
 
-resource "aws_elb" "pe_compiler_elb" {
-  count           = local.lb_count
-  name            = "pe-compiler-elb-${var.project}-${var.id}"
-  subnets         = var.subnet_ids
-  security_groups = var.security_group_ids
+resource "aws_lb" "pe_compiler_service" {
+  count                            = local.lb_count
+  name                             = "pe-compiler-lb-${var.project}-${var.id}"
+  subnets                          = var.subnet_ids
+  load_balancer_type               = "network"
+  enable_cross_zone_load_balancing = true 
+  idle_timeout                     = 400
+}
 
-  dynamic "listener" {
-    for_each = toset(var.ports)
+resource "aws_lb_listener" "pe_compiler" {
+  for_each          = var.has_lb ? local.lb_ports : []
+  load_balancer_arn = aws_lb.pe_compiler_service[0].arn
+  port              = each.value
+  protocol          = "TCP"
 
-    content {
-      instance_port     = listener.value
-      instance_protocol = "tcp"
-      lb_port           = listener.value
-      lb_protocol       = "tcp"
-    }
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.pe_compiler[each.value].arn
   }
+}
 
-  # TODO This is actually not the correct healthcheck
-  # The healthcheck should use the puppetserver's status endpoint
+resource "aws_lb_target_group" "pe_compiler" {
+  for_each    = var.has_lb ? local.lb_ports : []
+  name        = "pe-tg-${var.project}-${var.id}-${each.value}"
+  port        = each.value
+  protocol    = "TCP"
+  target_type = "instance"
+  vpc_id      = var.vpc_id
+
   health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 3
-    target              = "TCP:8140"
-    interval            = 30
+    port     = 8140
+    protocol = "HTTPS"
+    path     = "/status/v1/simple"
   }
+}
 
-  instances                   = var.instances[*].id
-  cross_zone_load_balancing   = true
-  idle_timeout                = 400
-  connection_draining         = true
-  connection_draining_timeout = 400
+# Reducing this section to one combined dynamic resource would make it hard to
+# read
+resource "aws_lb_target_group_attachment" "pe_compiler_8140" {
+  count            = var.compiler_count
+  target_group_arn = aws_lb_target_group.pe_compiler["8140"].arn
+  target_id        = tolist(var.instances)[count.index].id
+  port             = 8140
+}
 
-  tags = {
-    Name = "pe_compiler_elb_${var.project}_${var.id}"
-  }
+resource "aws_lb_target_group_attachment" "pe_compiler_8142" {
+  count            = var.compiler_count
+  target_group_arn = aws_lb_target_group.pe_compiler["8142"].arn
+  target_id        = tolist(var.instances)[count.index].id
+  port             = 8142
 }

@@ -23,6 +23,10 @@ variable "has_lb" {
   description = "A boolean that indicates if the deployment requires load balancer deployment"
   type        = bool
 }
+variable "compiler_count" {
+  description = "Work around for inability of Terraform to be able to predict number of attachments"
+  type        = number 
+}
 variable subnet_ids {
     description = "AWS subnet ids that are created by the networking module"
 }
@@ -31,4 +35,7 @@ variable security_group_ids {
 }
 variable project {
   description = "Project string to differentiate and associate resources"
+}
+variable "vpc_id" {
+  description = "ID of VPC network provisioned by the networking submodule"
 }
