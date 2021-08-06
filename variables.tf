@@ -1,7 +1,7 @@
 variable "project" {
   description = "Name of the PE architecture project"
   type        = string
-  default     = "ape"
+  default     = "autope"
 }
 variable "user" {
   description = "Instance user name that will used for SSH operations"
@@ -33,6 +33,11 @@ variable "instance_image" {
   description = "The AMI name pattern to use when deploying new cloud instances"
   type        = string
   default     = "CentOS Linux 7*ENA*"
+}
+variable "stack_name" {
+  description = "A name that'll help the user identify which instances are are part of a specific PE deployment"
+  type        = string
+  default     = "puppet-enterprise"
 }
 variable "architecture" {
   description = "Which of the supported PE architectures modules to deploy infrastructure with"

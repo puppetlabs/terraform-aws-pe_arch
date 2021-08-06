@@ -1,7 +1,7 @@
 # To contain each PE deployment, a fresh VPC to deploy into
 locals {
   name_tag = {
-    Name = "pe-${var.project}-${var.id}"
+    Name = "pe-${var.id}"
   }
 }
 
@@ -31,7 +31,7 @@ resource "aws_subnet" "pe_subnet" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "pe-${var.project}-${var.id}-${data.aws_availability_zones.available.names[count.index]}"
+    Name = "pe-${var.id}-${data.aws_availability_zones.available.names[count.index]}"
   }
 }
 
@@ -53,7 +53,7 @@ resource "aws_route_table_association" "pe_subnet_public" {
 # Instances should not be accessible by the open internet so a fresh VPC should
 # be restricted to organization allowed subnets
 resource "aws_security_group" "pe_sg" {
-  name        = "pe-${var.project}-${var.id}"
+  name        = "pe-${var.id}"
   description = "Allow TLS inbound traffic"
   vpc_id      = aws_vpc.pe.id
 

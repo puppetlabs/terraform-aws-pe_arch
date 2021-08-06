@@ -44,18 +44,11 @@ variable "instance_image" {
   description = "The disk image to use when deploying new cloud instances"
   type        = string
 }
+variable "stack_name" {
+  description = "A name that'll help the user identify which instances are are part of a specific PE deployment"
+  type        = string
+}
 variable "node_count" {
   description = "The quantity of nodes that are deployed within the environment for testing"
   type        = number
-}
-# The default tags are needed to prevent Puppet AWS reaper from reaping the instances
-variable default_tags {
-  description = "The default instance tags"
-  type        = map
-  default = {
-    description = "PEADM Architecture"
-    department  = "SA"
-    project     = "peadm - autope"
-    lifetime    = "1d"
-  }
 }
