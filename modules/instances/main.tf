@@ -19,9 +19,21 @@ data "aws_ami" "centos7" {
   owners = ["679593333241"] # How to look up AMI owner ID?
 }
 
+# The default tags are needed to prevent Puppet AWS reaper from reaping the instances
+locals {
+  default_tags = {
+    description = "PEADM Architecture"
+    department  = "SA"
+    project     = var.project
+    lifetime    = "1d"
+    stack       = var.stack_name
+  }
+}
+
 resource "aws_key_pair" "pe_adm" {
-  key_name   = "pe_adm_${var.project}"
+  key_name   = "pe_adm_${var.id}"
   public_key = file(var.ssh_key)
+  tags       = local.default_tags
 }
 
 # In both large and standard we only require a single Primary but under a
@@ -34,7 +46,7 @@ resource "aws_instance" "server" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, tomap({Name = "pe-server-${var.project}-${count.index}-${var.id}"}))
+  tags                   = merge(local.default_tags, tomap({Name = "pe-server-${count.index}-${var.id}"}))
 
   root_block_device {
     volume_size = 50
@@ -55,7 +67,7 @@ resource "aws_instance" "psql" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, tomap({Name = "pe-psql-${var.project}-${count.index}-${var.id}"}))
+  tags                   = merge(local.default_tags, tomap({Name = "pe-psql-${count.index}-${var.id}"}))
 
   root_block_device {
     volume_size = 100
@@ -77,7 +89,7 @@ resource "aws_instance" "compiler" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, tomap({Name = "pe-compiler-${var.project}-${count.index}-${var.id}"}))
+  tags                   = merge(local.default_tags, tomap({Name = "pe-compiler-${count.index}-${var.id}"}))
 
   root_block_device {
     volume_size = 15
@@ -94,7 +106,7 @@ resource "aws_instance" "node" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(var.default_tags, tomap({Name = "pe-node-${var.project}-${count.index}-${var.id}"}))
+  tags                   = merge(local.default_tags, tomap({Name = "pe-node-${count.index}-${var.id}"}))
 
   root_block_device {
     volume_size = 15

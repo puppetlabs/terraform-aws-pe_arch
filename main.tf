@@ -96,6 +96,7 @@ module "instances" {
   compiler_count     = local.compiler_count
   node_count         = var.node_count
   instance_image     = var.instance_image
+  stack_name         = var.stack_name
   project            = var.project
   server_count       = data.hiera5.server_count.value
   database_count     = data.hiera5.database_count.value

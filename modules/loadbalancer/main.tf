@@ -7,7 +7,7 @@ locals {
 
 resource "aws_lb" "pe_compiler_service" {
   count                            = local.lb_count
-  name                             = "pe-compiler-lb-${var.project}-${var.id}"
+  name                             = "pe-compiler-lb-${var.id}"
   subnets                          = var.subnet_ids
   load_balancer_type               = "network"
   enable_cross_zone_load_balancing = true 
@@ -28,7 +28,7 @@ resource "aws_lb_listener" "pe_compiler" {
 
 resource "aws_lb_target_group" "pe_compiler" {
   for_each    = var.has_lb ? local.lb_ports : []
-  name        = "pe-tg-${var.project}-${var.id}-${each.value}"
+  name        = "pe-tg-${var.id}-${each.value}"
   port        = each.value
   protocol    = "TCP"
   target_type = "instance"
