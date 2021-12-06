@@ -1,0 +1,7 @@
+---
+compiler_instance_type: t3.large
+primary_instance_type: t3.large
+database_instance_type: t3.large
+compiler_disk_size: 25
+primary_disk_size: 50
+database_disk_size: 100

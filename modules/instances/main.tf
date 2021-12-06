@@ -41,7 +41,7 @@ resource "aws_key_pair" "pe_adm" {
 # addition to hosting all other core services. 
 resource "aws_instance" "server" {
   ami                    = data.aws_ami.centos7.id
-  instance_type          = "t3.xlarge"
+  instance_type          = var.primary_type
   count                  = var.server_count
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index]
@@ -49,7 +49,7 @@ resource "aws_instance" "server" {
   tags                   = merge(local.default_tags, tomap({Name = "pe-server-${count.index}-${var.id}"}))
 
   root_block_device {
-    volume_size = 50
+    volume_size = var.primary_disk
     volume_type = "gp2"
   }
 }
@@ -60,7 +60,7 @@ resource "aws_instance" "server" {
 # hosts in extra large but nothing in the other two architectures
 resource "aws_instance" "psql" {
   ami                    = data.aws_ami.centos7.id
-  instance_type          = "t3.2xlarge"
+  instance_type          = var.database_type
   # count is used to effectively "no-op" this resource in the event that we
   # deploy any architecture other than xlarge
   count                  = var.database_count
@@ -70,7 +70,7 @@ resource "aws_instance" "psql" {
   tags                   = merge(local.default_tags, tomap({Name = "pe-psql-${count.index}-${var.id}"}))
 
   root_block_device {
-    volume_size = 100
+    volume_size = var.database_disk
     volume_type = "gp2"
   }
 }
@@ -82,7 +82,7 @@ resource "aws_instance" "psql" {
 # to standard
 resource "aws_instance" "compiler" {
   ami                    = data.aws_ami.centos7.id
-  instance_type          = "t3.xlarge"
+  instance_type          = var.compiler_type
   # count is used to effectively "no-op" this resource in the event that we
   # deploy the standard architecture
   count                  = var.compiler_count
@@ -92,7 +92,7 @@ resource "aws_instance" "compiler" {
   tags                   = merge(local.default_tags, tomap({Name = "pe-compiler-${count.index}-${var.id}"}))
 
   root_block_device {
-    volume_size = 15
+    volume_size = var.compiler_disk
     volume_type = "gp2"
   }
 }

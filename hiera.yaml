@@ -6,7 +6,11 @@ defaults:
   data_hash: yaml_data
 
 hierarchy:
+  - name: Mode
+    path: architecture/%{architecture}/mode/%{mode}.yaml
   - name: Replicas
     path: architecture/%{architecture}/replica/%{replica}.yaml
   - name: Architectures
     path: architecture/%{architecture}.yaml
+  - name: Common
+    path: common.yaml

@@ -2,3 +2,6 @@
 server_count: 1
 database_count: 1
 has_compilers: true
+compiler_instance_type: t3.large
+primary_instance_type: t3.xlarge
+database_instance_type: t3.2xlarge

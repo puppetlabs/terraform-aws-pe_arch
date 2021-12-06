@@ -2,3 +2,4 @@
 server_count: 1
 database_count: 0
 has_compilers: false
+primary_instance_type: t3.large

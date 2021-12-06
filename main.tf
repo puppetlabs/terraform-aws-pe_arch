@@ -23,6 +23,7 @@ provider "hiera5" {
   scope = {
     architecture = var.architecture
     replica      = var.replica
+    mode         = var.mode
   }
 }
 
@@ -37,8 +38,29 @@ data "hiera5" "server_count" {
 data "hiera5" "database_count" {
   key = "database_count"
 }
+
 data "hiera5_bool" "has_compilers" {
   key = "has_compilers"
+}
+
+data "hiera5" "compiler_type" {
+  key = "compiler_instance_type"
+}
+data "hiera5" "primary_type" {
+  key = "primary_instance_type"
+}
+data "hiera5" "database_type" {
+  key = "database_instance_type"
+}
+
+data "hiera5" "compiler_disk" {
+  key = "compiler_disk_size"
+}
+data "hiera5" "primary_disk" {
+  key = "primary_disk_size"
+}
+data "hiera5" "database_disk" {
+  key = "database_disk_size"
 }
 
 # It is intended that multiple deployments can be launched easily without
@@ -100,4 +122,10 @@ module "instances" {
   project            = var.project
   server_count       = data.hiera5.server_count.value
   database_count     = data.hiera5.database_count.value
+  compiler_type      = data.hiera5.compiler_type.value
+  primary_type       = data.hiera5.primary_type.value
+  database_type      = data.hiera5.database_type.value
+  compiler_disk      = data.hiera5.compiler_disk.value
+  primary_disk       = data.hiera5.primary_disk.value
+  database_disk      = data.hiera5.database_disk.value
 }

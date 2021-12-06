@@ -1,0 +1,5 @@
+---
+compiler_instance_type: c5.2xlarge
+primary_instance_type: c5.4xlarge
+compiler_disk_size: 60
+primary_disk_size: 185
