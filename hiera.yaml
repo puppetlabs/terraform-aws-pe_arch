@@ -6,8 +6,8 @@ defaults:
   data_hash: yaml_data
 
 hierarchy:
-  - name: Mode
-    path: architecture/%{architecture}/mode/%{mode}.yaml
+  - name: Cluster Profile
+    path: architecture/%{architecture}/cluster/%{profile}.yaml
   - name: Replicas
     path: architecture/%{architecture}/replica/%{replica}.yaml
   - name: Architectures

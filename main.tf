@@ -23,7 +23,7 @@ provider "hiera5" {
   scope = {
     architecture = var.architecture
     replica      = var.replica
-    mode         = var.mode
+    profile      = var.cluster_profile
   }
 }
 
