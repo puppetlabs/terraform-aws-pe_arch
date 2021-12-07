@@ -52,3 +52,27 @@ variable "node_count" {
   description = "The quantity of nodes that are deployed within the environment for testing"
   type        = number
 }
+variable "compiler_type" {
+  description = "Instance type of compilers"
+  type        = string
+}
+variable "primary_type" {
+  description = "Instance type of primary and replica"
+  type        = string
+}
+variable "database_type" {
+  description = "Instance type of PuppetDB database and replica"
+  type        = string
+}
+variable "compiler_disk" {
+  description = "Instance disk size of compilers"
+  type        = string
+}
+variable "primary_disk" {
+  description = "Instance disk size of primary and replica"
+  type        = string
+}
+variable "database_disk" {
+  description = "Instance disk size of PuppetDB database and replica"
+  type        = string
+}

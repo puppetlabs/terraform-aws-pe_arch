@@ -54,3 +54,13 @@ variable "replica" {
   type        = bool
   default     = false
 }
+variable "cluster_profile" {
+  description = "Which cluster profile to use for defining provisioned instance sizes"
+  type        = string
+  default     = "development"
+
+  validation {
+    condition     = contains(["production", "development", "user"], var.mode)
+    error_message = "cluster_profile selection must match one of production, development, or user."
+  }
+}

@@ -1,0 +1,3 @@
+---
+primary_instance_type: c5.4xlarge
+primary_disk_size: 100
