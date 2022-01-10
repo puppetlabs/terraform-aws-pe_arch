@@ -60,7 +60,7 @@ variable "cluster_profile" {
   default     = "development"
 
   validation {
-    condition     = contains(["production", "development", "user"], var.mode)
+    condition     = contains(["production", "development", "user"], var.cluster_profile)
     error_message = "cluster_profile selection must match one of production, development, or user."
   }
 }
