@@ -32,7 +32,7 @@ variable "node_count" {
 variable "instance_image" {
   description = "The AMI name pattern to use when deploying new cloud instances"
   type        = string
-  default     = "CentOS Linux 7*ENA*"
+  default     = "764336703387/AlmaLinux OS 8*"
 }
 variable "stack_name" {
   description = "A name that'll help the user identify which instances are are part of a specific PE deployment"

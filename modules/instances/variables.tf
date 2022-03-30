@@ -41,8 +41,17 @@ variable "project" {
   type        = string
 }
 variable "instance_image" {
-  description = "The disk image to use when deploying new cloud instances"
+  description = "The AMI name pattern to use when deploying new cloud instances"
   type        = string
+}
+variable "image_owner" {
+  description = "The AMI name pattern to use when deploying new cloud instances"
+  type        = string
+}
+variable "image_product_code" {
+  description = "The AMI name pattern to use when deploying new cloud instances"
+  type        = string
+  nullable    = true
 }
 variable "stack_name" {
   description = "A name that'll help the user identify which instances are are part of a specific PE deployment"

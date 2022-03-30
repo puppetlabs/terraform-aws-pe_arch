@@ -72,10 +72,14 @@ resource "random_id" "deployment" {
 # Collect some repeated values used by each major component module into one to
 # make them easier to update
 locals {
-  allowed        = concat(["10.128.0.0/9"], var.firewall_allow)
-  compiler_count = data.hiera5_bool.has_compilers.value ? var.compiler_count : 0
-  id             = random_id.deployment.hex
-  has_lb         = data.hiera5_bool.has_compilers.value ? true : false
+  allowed            = concat(["10.128.0.0/9"], var.firewall_allow)
+  compiler_count     = data.hiera5_bool.has_compilers.value ? var.compiler_count : 0
+  id                 = random_id.deployment.hex
+  has_lb             = data.hiera5_bool.has_compilers.value ? true : false
+  image_list         = split("/", var.instance_image)
+  image_owner        = local.image_list[0]
+  image_pattern      = local.image_list[1]
+  image_product_code = try(local.image_list[2], null)
 }
 
 # Contain all the networking configuration in a module for readability
@@ -117,7 +121,9 @@ module "instances" {
   ssh_key            = var.ssh_key
   compiler_count     = local.compiler_count
   node_count         = var.node_count
-  instance_image     = var.instance_image
+  instance_image     = local.image_pattern
+  image_owner        = local.image_owner
+  image_product_code = local.image_product_code
   stack_name         = var.stack_name
   project            = var.project
   server_count       = data.hiera5.server_count.value
