@@ -3,11 +3,25 @@ locals {
   name_tag = {
     Name = "pe-${var.id}"
   }
+  network_count = var.to_create ? 1 : 0
+  vpc_id        = try(aws_vpc.pe[0].id, data.aws_vpc.existing[0].id)
+  subnet_ids    = coalescelist(aws_subnet.pe_subnet[*].id, data.aws_subnet.existing[*].id)
 }
 
 data "aws_availability_zones" "available" {}
 
+data "aws_subnet" "existing" {
+  count = var.to_create ? 0 : length(toset(var.subnetwork))
+  id    = var.subnetwork[count.index]
+}
+
+data "aws_vpc" "existing" {
+  count = var.to_create ? 0 : 1
+  id    = try(distinct(data.aws_subnet.existing[*].vpc_id)[0], null)
+}
+
 resource "aws_vpc" "pe" {
+  count                = local.network_count
   cidr_block           = "10.138.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -16,15 +30,16 @@ resource "aws_vpc" "pe" {
 }
 
 resource "aws_internet_gateway" "pe_gw" {
-  vpc_id = aws_vpc.pe.id
+  count  = local.network_count
+  vpc_id = local.vpc_id
 
   tags = local.name_tag
 }
 
 #TODO implement a subnet per availability zone
 resource "aws_subnet" "pe_subnet" {
-  vpc_id            = aws_vpc.pe.id
-  count             = length(data.aws_availability_zones.available.names)
+  count             = var.to_create ? length(data.aws_availability_zones.available.names) : local.network_count
+  vpc_id            = local.vpc_id
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   cidr_block              = "10.138.${1 + count.index}.0/24"
@@ -36,18 +51,19 @@ resource "aws_subnet" "pe_subnet" {
 }
 
 resource "aws_route_table" "pe_public" {
-  vpc_id = aws_vpc.pe.id
+  count  = local.network_count
+  vpc_id = local.vpc_id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.pe_gw.id
+    gateway_id = aws_internet_gateway.pe_gw[0].id
   }
   tags = local.name_tag
 }
 
 resource "aws_route_table_association" "pe_subnet_public" {
-  count          = length(aws_subnet.pe_subnet)
+  count          = var.to_create ? length(aws_subnet.pe_subnet) : local.network_count
   subnet_id      = aws_subnet.pe_subnet[count.index].id
-  route_table_id = aws_route_table.pe_public.id
+  route_table_id = aws_route_table.pe_public[0].id
 }
 
 # Instances should not be accessible by the open internet so a fresh VPC should
@@ -55,7 +71,7 @@ resource "aws_route_table_association" "pe_subnet_public" {
 resource "aws_security_group" "pe_sg" {
   name        = "pe-${var.id}"
   description = "Allow TLS inbound traffic"
-  vpc_id      = aws_vpc.pe.id
+  vpc_id      = local.vpc_id
 
   ingress {
     description = "General ingress rule"
@@ -70,7 +86,7 @@ resource "aws_security_group" "pe_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1" # all protocols and ports
-    cidr_blocks = tolist([aws_vpc.pe.cidr_block])
+    cidr_blocks = tolist([try(aws_vpc.pe[0].cidr_block, data.aws_vpc.existing[0].cidr_block)])
   }
 
   egress {

@@ -79,14 +79,17 @@ locals {
   image_owner        = local.image_list[0]
   image_pattern      = local.image_list[1]
   image_product_code = try(local.image_list[2], null)
+  create_network     = var.subnetwork == null ? true : false
 }
 
 # Contain all the networking configuration for readability
 module "networking" {
-  source  = "./modules/networking"
-  id      = local.id
-  project = var.project
-  allow   = local.allowed
+  source     = "./modules/networking"
+  id         = local.id
+  project    = var.project
+  allow      = local.allowed
+  to_create  = local.create_network
+  subnetwork = var.subnetwork
 }
 
 # Contain all the loadbalancer configuration for readability
