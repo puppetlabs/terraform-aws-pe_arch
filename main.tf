@@ -74,7 +74,7 @@ locals {
   allowed            = concat(["10.128.0.0/9"], var.firewall_allow)
   compiler_count     = data.hiera5_bool.has_compilers.value ? var.compiler_count : 0
   id                 = random_id.deployment.hex
-  has_lb             = data.hiera5_bool.has_compilers.value ? true : false
+  has_lb             = var.disable_lb ? false : data.hiera5_bool.has_compilers.value ? true : false
   image_list         = split("/", var.instance_image)
   image_owner        = local.image_list[0]
   image_pattern      = local.image_list[1]
@@ -105,6 +105,7 @@ module "loadbalancer" {
   instances          = module.instances.compilers
   has_lb             = local.has_lb
   compiler_count     = local.compiler_count
+  lb_ip_mode         = var.lb_ip_mode
 }
 
 # Contain all the instances configuration for readability

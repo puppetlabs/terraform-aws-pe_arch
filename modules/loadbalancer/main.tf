@@ -3,11 +3,13 @@ locals {
   # When using for_each to create multiple of the same resource type the value
   # set must be a set of strings, numbers toss an error
   lb_ports = toset(["8140", "8142"])
+  internal = var.lb_ip_mode == "private" ? true : false
 }
 
 resource "aws_lb" "pe_compiler_service" {
   count                            = local.lb_count
   name                             = "pe-compiler-lb-${var.id}"
+  internal                         = local.internal
   subnets                          = var.subnet_ids
   load_balancer_type               = "network"
   enable_cross_zone_load_balancing = true 
@@ -44,14 +46,14 @@ resource "aws_lb_target_group" "pe_compiler" {
 # Reducing this section to one combined dynamic resource would make it hard to
 # read
 resource "aws_lb_target_group_attachment" "pe_compiler_8140" {
-  count            = var.compiler_count
+  count            = var.has_lb ? var.compiler_count : local.lb_count
   target_group_arn = aws_lb_target_group.pe_compiler["8140"].arn
   target_id        = tolist(var.instances)[count.index].id
   port             = 8140
 }
 
 resource "aws_lb_target_group_attachment" "pe_compiler_8142" {
-  count            = var.compiler_count
+  count            = var.has_lb ? var.compiler_count : local.lb_count
   target_group_arn = aws_lb_target_group.pe_compiler["8142"].arn
   target_id        = tolist(var.instances)[count.index].id
   port             = 8142
