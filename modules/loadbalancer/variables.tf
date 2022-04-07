@@ -8,7 +8,7 @@ variable ports {
     type        = list(string)
 }
 variable "region" {
-  description = "GCP region that'll be targeted for infrastructure deployment"
+  description = "AWS region that'll be targeted for infrastructure deployment"
   type        = string
 }
 variable instances {
@@ -16,7 +16,7 @@ variable instances {
     type        = set(any)
 }
 variable "id" {
-  description = "Randomly generated value used to produce unique names for everything to prevent collisions and visually link resources together"
+  description = "Randomly generated value used to produce unique names for everything"
   type        = string
 }
 variable "has_lb" {
@@ -24,18 +24,18 @@ variable "has_lb" {
   type        = bool
 }
 variable "compiler_count" {
-  description = "Work around for inability of Terraform to be able to predict number of attachments"
+  description = "The quantity of compilers that are deployed behind a load balancer"
   type        = number 
 }
 variable subnet_ids {
-    description = "AWS subnet ids that are created by the networking module"
+    description = "AWS subnet ids that are provided by the networking module"
 }
 variable security_group_ids {
-    description = "AWS security groups ids that are created by the networking module"
+    description = "AWS security groups ids that are provided by the networking module"
 }
 variable project {
-  description = "Project string to differentiate and associate resources"
+  description = "The name of the PE deployment project to tag resources with"
 }
 variable "vpc_id" {
-  description = "ID of VPC network provisioned by the networking submodule"
+  description = "Randomly generated value used to produce unique names for everything"
 }

@@ -3,7 +3,7 @@
 # be called from anything else expect the main module where values for all these
 # variables will always be passed in
 variable id {
-  description = "Randomly generated value used to produce unique names for everything to prevent collisions and visually link resources together"
+  description = "Randomly generated value used to produce unique names for everything"
   type        = string
 }
 variable allow {
@@ -11,5 +11,5 @@ variable allow {
   type        = list(string)
 }
 variable project {
-  description = "Project string to differentiate and associate resources"
+  description = "The name of the PE deployment project to tag resources with"
 }
