@@ -4,7 +4,7 @@
 # anything else expect the main module where values for all these variables will
 # always be passed in
 variable "user" {
-  description = "Instance user name that will used for SSH operations"
+  description = "Default instance user name that will used for SSH operations"
   type        = string
 }
 variable "ssh_key" {
@@ -12,40 +12,49 @@ variable "ssh_key" {
   type        = string
 }
 variable "compiler_count" {
-  description = "The quantity of compilers that are deployed behind a load balancer and will be spread across defined zones"
+  description = "The quantity of compilers that are provisioned behind a load balancer"
   type        = number
 }
 variable "server_count" {
-  description = "The quantity of nodes that are deployed within the environment for testing"
+  description = "The quantity of server nodes which are provisioned for the stack"
   type        = number
 }
 variable "database_count" {
-  description = "The quantity of nodes that are deployed within the environment for testing"
+  description = "The quantity of database nodes which are provisioned for the stack"
   type        = number
 }
 variable "id" {
-  description = "Randomly generated value used to produce unique names for everything to prevent collisions and visually link resources together"
+  description = "Randomly generated value used to produce unique names for everything"
   type        = string
 }
 variable "vpc_id" {
-  description = "ID of VPC network provisioned by the networking submodule"
+  description = "Randomly generated value used to produce unique names for everything"
 }
 variable "subnet_ids" {
-  description = "List of zonal subnet IDs provisioned by the networking submodule"
+  description = "AWS subnet ids that are provided by the networking module"
 }
 variable "security_group_ids" {
-  description = "List of SG IDs provisioned by the networking submodule"
+  description = "AWS security groups ids that are provided by the networking module"
 }
 variable "project" {
-  description = "Name of project that will be used for cosmetically linking resources together"
+  description = "The name of the PE deployment project to tag resources with"
   type        = string
 }
 variable "instance_image" {
-  description = "The disk image to use when deploying new cloud instances"
+  description = "The AMI name pattern to use when provisioning cloud instances"
   type        = string
 }
+variable "image_owner" {
+  description = "The owner ID of the desired AMI to use for provisioned cloud instances"
+  type        = string
+}
+variable "image_product_code" {
+  description = "The product code of desired AMI when sourcing from the AWS Marketplace"
+  type        = string
+  nullable    = true
+}
 variable "stack_name" {
-  description = "A name that'll help the user identify which instances are are part of a specific PE deployment"
+  description = "A tag to group individual PE deployments within each project together"
   type        = string
 }
 variable "node_count" {

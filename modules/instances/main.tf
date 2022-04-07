@@ -3,7 +3,7 @@
 #
 # To use AMIs by this owner, an EULA has to be accepted once using the AWS
 # Console.
-data "aws_ami" "centos7" {
+data "aws_ami" "ami" {
   most_recent = true
 
   filter {
@@ -16,8 +16,22 @@ data "aws_ami" "centos7" {
     values = ["hvm"]
   }
 
-  owners = ["679593333241"] # How to look up AMI owner ID?
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  dynamic "filter" {
+    for_each = var.image_product_code == null ? [] : [1]
+    content {
+      name   = "product-code"
+      values = [var.image_product_code]
+    }
+  }
+
+  owners = [var.image_owner]
 }
+
 
 # The default tags are needed to prevent Puppet AWS reaper from reaping the instances
 locals {
@@ -40,7 +54,7 @@ resource "aws_key_pair" "pe_adm" {
 # standard architecture the instance will also serve catalogs as a Compiler in
 # addition to hosting all other core services. 
 resource "aws_instance" "server" {
-  ami                    = data.aws_ami.centos7.id
+  ami                    = data.aws_ami.ami.id
   instance_type          = var.primary_type
   count                  = var.server_count
   key_name               = aws_key_pair.pe_adm.key_name
@@ -59,7 +73,7 @@ resource "aws_instance" "server" {
 # that extra large currently also means "with replica", we deploy two identical
 # hosts in extra large but nothing in the other two architectures
 resource "aws_instance" "psql" {
-  ami                    = data.aws_ami.centos7.id
+  ami                    = data.aws_ami.ami.id
   instance_type          = var.database_type
   # count is used to effectively "no-op" this resource in the event that we
   # deploy any architecture other than xlarge
@@ -81,7 +95,7 @@ resource "aws_instance" "psql" {
 # extra large but only ever zero can be deployed when the operating mode is set
 # to standard
 resource "aws_instance" "compiler" {
-  ami                    = data.aws_ami.centos7.id
+  ami                    = data.aws_ami.ami.id
   instance_type          = var.compiler_type
   # count is used to effectively "no-op" this resource in the event that we
   # deploy the standard architecture
@@ -100,7 +114,7 @@ resource "aws_instance" "compiler" {
 # User requested number of nodes to serve as agent nodes for when this module is
 # used to standup Puppet Enterprise for test and evaluation
 resource "aws_instance" "node" {
-  ami                    = data.aws_ami.centos7.id
+  ami                    = data.aws_ami.ami.id
   instance_type          = "t3.small"
   count                  = var.node_count
   key_name               = aws_key_pair.pe_adm.key_name

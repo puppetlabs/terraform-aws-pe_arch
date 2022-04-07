@@ -1,12 +1,12 @@
 variable "project" {
-  description = "Name of the PE architecture project"
+  description = "The name of the PE deployment project to tag resources with"
   type        = string
-  default     = "autope"
+  default     = "pecdm"
 }
 variable "user" {
-  description = "Instance user name that will used for SSH operations"
+  description = "Default instance user name that will used for SSH operations"
   type        = string
-  default     = "centos"
+  default     = "ec2-user"
 }
 variable "ssh_key" {
   description = "Location on disk of the SSH public key to be used for instance SSH access"
@@ -16,10 +16,10 @@ variable "ssh_key" {
 variable "region" {
   description = "AWS region that'll be targeted for infrastructure deployment"
   type        = string
-  default     = "eu-central-1"
+  default     = "us-west-2"
 }
 variable "compiler_count" {
-  description = "The quantity of compilers that are deployed behind a load balancer and will be spread across defined zones"
+  description = "The quantity of compilers that are provisioned behind a load balancer"
   type        = number
   default     = 1
 }
@@ -28,29 +28,31 @@ variable "node_count" {
   type        = number
   default     = 0
 }
-# Note that you might need to accept the AWS EULA for the AMI product used here
+# If you provision from Marketplace then you might need to accept the AWS EULA
+# for the AMI product used, default comes directly from AlmaLinux and no
+# additional steps are required
 variable "instance_image" {
   description = "The AMI name pattern to use when deploying new cloud instances"
   type        = string
-  default     = "CentOS Linux 7*ENA*"
+  default     = "764336703387/AlmaLinux OS 8*"
 }
 variable "stack_name" {
-  description = "A name that'll help the user identify which instances are are part of a specific PE deployment"
+  description = "A tag to group individual PE deployments within each project together"
   type        = string
   default     = "puppet-enterprise"
 }
 variable "architecture" {
-  description = "Which of the supported PE architectures modules to deploy infrastructure with"
+  description = "Which of the supported PE architectures modules to provision infrastructure for"
   type        = string
   default     = "large"
 }
 variable "firewall_allow" {
-  description = "List of permitted IP subnets, list most include the internal network and single addresses must be passed as a /32"
+  description = "List of permitted IP addresses, all entries must be provided in CIDR Subnet Mask Notation"
   type        = list(string)
   default     = []
 }
 variable "replica" {
-  description = "To deploy instances required for the provisioning of a server replica"
+  description = "To provision instances required for the deploying a primary server replica"
   type        = bool
   default     = false
 }

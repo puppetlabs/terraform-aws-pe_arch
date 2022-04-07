@@ -31,7 +31,7 @@ provider "aws" {
   region  = var.region
 }
 
-# hiera lookps
+# hiera lookups
 data "hiera5" "server_count" {
   key = "server_count"
 }
@@ -63,22 +63,25 @@ data "hiera5" "database_disk" {
   key = "database_disk_size"
 }
 
-# It is intended that multiple deployments can be launched easily without
-# name colliding
+# Prevent name collisions when multiple PE deployments are provisioned within
+# the same AWS account
 resource "random_id" "deployment" {
   byte_length = 3
 }
 
-# Collect some repeated values used by each major component module into one to
-# make them easier to update
+# Repeated and computed values used by component modules
 locals {
-  allowed        = concat(["10.128.0.0/9"], var.firewall_allow)
-  compiler_count = data.hiera5_bool.has_compilers.value ? var.compiler_count : 0
-  id             = random_id.deployment.hex
-  has_lb         = data.hiera5_bool.has_compilers.value ? true : false
+  allowed            = concat(["10.128.0.0/9"], var.firewall_allow)
+  compiler_count     = data.hiera5_bool.has_compilers.value ? var.compiler_count : 0
+  id                 = random_id.deployment.hex
+  has_lb             = data.hiera5_bool.has_compilers.value ? true : false
+  image_list         = split("/", var.instance_image)
+  image_owner        = local.image_list[0]
+  image_pattern      = local.image_list[1]
+  image_product_code = try(local.image_list[2], null)
 }
 
-# Contain all the networking configuration in a module for readability
+# Contain all the networking configuration for readability
 module "networking" {
   source  = "./modules/networking"
   id      = local.id
@@ -86,7 +89,7 @@ module "networking" {
   allow   = local.allowed
 }
 
-# Contain all the loadbalancer configuration in a module for readability
+# Contain all the loadbalancer configuration for readability
 module "loadbalancer" {
   source             = "./modules/loadbalancer"
   id                 = local.id
@@ -101,12 +104,8 @@ module "loadbalancer" {
   compiler_count     = local.compiler_count
 }
 
-# Contain all the instances configuration in a module for readability
+# Contain all the instances configuration for readability
 # 
-# NOTE: you will need to add your private key corresponding to `ssh_key` 
-# to the ssh agent like so:
-# $ eval $(ssh-agent)
-# $ ssh-add
 module "instances" {
   source             = "./modules/instances"
   vpc_id             = module.networking.vpc_id
@@ -117,7 +116,9 @@ module "instances" {
   ssh_key            = var.ssh_key
   compiler_count     = local.compiler_count
   node_count         = var.node_count
-  instance_image     = var.instance_image
+  instance_image     = local.image_pattern
+  image_owner        = local.image_owner
+  image_product_code = local.image_product_code
   stack_name         = var.stack_name
   project            = var.project
   server_count       = data.hiera5.server_count.value
