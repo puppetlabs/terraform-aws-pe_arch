@@ -18,7 +18,7 @@ variable "to_create" {
   type        = bool
   default     = true
 }
-variable "subnetwork" {
+variable "subnet" {
   description = "List of existing subnets to deploy to as opposed to creating them"
   type        = list(string)
   default     = []

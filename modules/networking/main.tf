@@ -11,8 +11,8 @@ locals {
 data "aws_availability_zones" "available" {}
 
 data "aws_subnet" "existing" {
-  count = var.to_create ? 0 : length(toset(var.subnetwork))
-  id    = var.subnetwork[count.index]
+  count = var.to_create ? 0 : length(toset(var.subnet))
+  id    = var.subnet[count.index]
 }
 
 data "aws_vpc" "existing" {

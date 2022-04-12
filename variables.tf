@@ -66,8 +66,8 @@ variable "cluster_profile" {
     error_message = "The cluster profile selection must match one of production, development, or user."
   }
 }
-variable "subnetwork" {
-  description = "An optional list of subnetworks to use"
+variable "subnet" {
+  description = "An optional list of subnets to use"
   type        = list(string)
   default     = null
 }
