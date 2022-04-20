@@ -51,7 +51,7 @@ variable "image_owner" {
 variable "image_product_code" {
   description = "The product code of desired AMI when sourcing from the AWS Marketplace"
   type        = string
-  nullable    = true
+  default     = null
 }
 variable "stack_name" {
   description = "A tag to group individual PE deployments within each project together"
