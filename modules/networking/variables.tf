@@ -13,3 +13,13 @@ variable allow {
 variable project {
   description = "The name of the PE deployment project to tag resources with"
 }
+variable "to_create" {
+  description = "If the networks should be created"
+  type        = bool
+  default     = true
+}
+variable "subnet" {
+  description = "List of existing subnets to deploy to as opposed to creating them"
+  type        = list(string)
+  default     = []
+}

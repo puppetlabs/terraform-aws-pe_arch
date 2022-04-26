@@ -66,3 +66,23 @@ variable "cluster_profile" {
     error_message = "The cluster profile selection must match one of production, development, or user."
   }
 }
+variable "subnet" {
+  description = "An optional list of subnets to use"
+  type        = list(string)
+  default     = null
+}
+variable "lb_ip_mode" {
+  description = "Designate if a public or private IP address is assigned to load balancer"
+  type        = string
+  default     = "public"
+
+  validation {
+    condition     = contains(["public", "private"], var.lb_ip_mode)
+    error_message = "The provisioned load balancer can only have a public or private IP address assigned."
+  }
+}
+variable "disable_lb" {
+  description = "Disable load balancer creation for all architectures if you desire manually provisioning your own"
+  type        = bool
+  default     = false
+}
