@@ -58,7 +58,7 @@ resource "aws_instance" "server" {
   instance_type          = var.primary_type
   count                  = var.server_count
   key_name               = aws_key_pair.pe_adm.key_name
-  subnet_id              = var.subnet_ids[count.index]
+  subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
   tags                   = merge(local.default_tags, tomap({Name = "pe-server-${count.index}-${var.id}"}))
 
@@ -79,7 +79,7 @@ resource "aws_instance" "psql" {
   # deploy any architecture other than xlarge
   count                  = var.database_count
   key_name               = aws_key_pair.pe_adm.key_name
-  subnet_id              = var.subnet_ids[count.index]
+  subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
   tags                   = merge(local.default_tags, tomap({Name = "pe-psql-${count.index}-${var.id}"}))
 
