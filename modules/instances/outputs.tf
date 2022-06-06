@@ -1,7 +1,7 @@
 # Output data that will be used by other submodules to build other parts of the
 # stack to support defined architecture
 output "console" {
-  value       = try(aws_instance.server[0].public_ip, "")
+  value       = coalesce(aws_instance.server[0].public_ip, aws_instance.server[0].private_ip)
   description = "This will be the external IP address assigned to the Puppet Enterprise console"
 }
 output "compilers" {
