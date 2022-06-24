@@ -123,7 +123,7 @@ module "instances" {
   instance_image     = local.image_pattern
   image_owner        = local.image_owner
   image_product_code = local.image_product_code
-  stack_name         = var.stack_name
+  tags               = var.tags
   project            = var.project
   server_count       = data.hiera5.server_count.value
   database_count     = data.hiera5.database_count.value

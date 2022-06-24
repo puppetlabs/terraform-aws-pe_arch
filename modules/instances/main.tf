@@ -35,19 +35,16 @@ data "aws_ami" "ami" {
 
 # The default tags are needed to prevent Puppet AWS reaper from reaping the instances
 locals {
-  default_tags = {
-    description = "PEADM Architecture"
-    department  = "SA"
+  tags = merge({
+    description = "PEADM Deployed Puppet Enterprise"
     project     = var.project
-    lifetime    = "1d"
-    stack       = var.stack_name
-  }
+  }, var.tags)
 }
 
 resource "aws_key_pair" "pe_adm" {
   key_name   = "pe_adm_${var.id}"
   public_key = file(var.ssh_key)
-  tags       = local.default_tags
+  tags       = local.tags
 }
 
 # In both large and standard we only require a single Primary but under a
@@ -60,7 +57,9 @@ resource "aws_instance" "server" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(local.default_tags, tomap({Name = "pe-server-${count.index}-${var.id}"}))
+  tags                   = merge(local.tags, tomap({
+    "Name" = "pe-server-${count.index}-${var.id}"
+  }))
 
   root_block_device {
     volume_size = var.primary_disk
@@ -81,7 +80,9 @@ resource "aws_instance" "psql" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(local.default_tags, tomap({Name = "pe-psql-${count.index}-${var.id}"}))
+  tags                   = merge(local.tags, tomap({
+    "Name" = "pe-psql-${count.index}-${var.id}"
+  }))
 
   root_block_device {
     volume_size = var.database_disk
@@ -103,7 +104,9 @@ resource "aws_instance" "compiler" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(local.default_tags, tomap({Name = "pe-compiler-${count.index}-${var.id}"}))
+  tags                   = merge(local.tags, tomap({
+    "Name" = "pe-compiler-${count.index}-${var.id}"
+  }))
 
   root_block_device {
     volume_size = var.compiler_disk
@@ -120,7 +123,9 @@ resource "aws_instance" "node" {
   key_name               = aws_key_pair.pe_adm.key_name
   subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
   vpc_security_group_ids = var.security_group_ids
-  tags                   = merge(local.default_tags, tomap({Name = "pe-node-${count.index}-${var.id}"}))
+  tags                   = merge(local.tags, tomap({
+    "Name" = "pe-node-${count.index}-${var.id}"
+  }))
 
   root_block_device {
     volume_size = 15

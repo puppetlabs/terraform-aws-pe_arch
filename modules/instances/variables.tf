@@ -53,9 +53,9 @@ variable "image_product_code" {
   type        = string
   default     = null
 }
-variable "stack_name" {
-  description = "A tag to group individual PE deployments within each project together"
-  type        = string
+variable "tags" {
+  description = "A map of tags to apply to provisioned resources"
+  type        = map
 }
 variable "node_count" {
   description = "The quantity of nodes that are deployed within the environment for testing"
