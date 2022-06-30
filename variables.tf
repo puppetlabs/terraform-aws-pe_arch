@@ -36,10 +36,10 @@ variable "instance_image" {
   type        = string
   default     = "764336703387/AlmaLinux OS 8*"
 }
-variable "stack_name" {
-  description = "A tag to group individual PE deployments within each project together"
-  type        = string
-  default     = "puppet-enterprise"
+variable "tags" {
+  description = "A map of tags to apply to provisioned resources"
+  type        = map
+  default     = {}
 }
 variable "architecture" {
   description = "Which of the supported PE architectures modules to provision infrastructure for"
