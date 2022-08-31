@@ -86,3 +86,8 @@ variable "disable_lb" {
   type        = bool
   default     = false
 }
+variable "domain_name" {
+  description = "Custom domain to use for internalDNS"
+  type        = string
+  default     = null
+}

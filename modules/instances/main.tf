@@ -47,6 +47,27 @@ resource "aws_key_pair" "pe_adm" {
   tags       = local.tags
 }
 
+# Additional internalDNS depends on instances to be deployed to determine the
+# value of private_dns, instance resource ignore content of this tag
+resource "aws_ec2_tag" "server-dns" {
+  count       = length(aws_instance.server[*])
+  resource_id = aws_instance.server[count.index].id
+  key         = "internalDNS"
+  value       = var.domain_name == null ? aws_instance.server[count.index].private_dns : "pe-server-${count.index}-${var.id}.${var.domain_name}"
+}
+resource "aws_ec2_tag" "psql-dns" {
+  count       = length(aws_instance.psql[*])
+  resource_id = aws_instance.psql[count.index].id
+  key         = "internalDNS"
+  value       = var.domain_name == null ? aws_instance.psql[count.index].private_dns : "pe-psql-${count.index}-${var.id}.${var.domain_name}"
+}
+resource "aws_ec2_tag" "compiler-dns" {
+  count       = length(aws_instance.compiler[*])
+  resource_id = aws_instance.compiler[count.index].id
+  key         = "internalDNS"
+  value       = var.domain_name == null ? aws_instance.compiler[count.index].private_dns : "pe-compiler-${count.index}-${var.id}.${var.domain_name}"
+}
+
 # In both large and standard we only require a single Primary but under a
 # standard architecture the instance will also serve catalogs as a Compiler in
 # addition to hosting all other core services. 
@@ -60,6 +81,10 @@ resource "aws_instance" "server" {
   tags                   = merge(local.tags, tomap({
     "Name" = "pe-server-${count.index}-${var.id}"
   }))
+
+  lifecycle {
+    ignore_changes = [tags["internalDNS"]]
+  }
 
   root_block_device {
     volume_size = var.primary_disk
@@ -84,6 +109,10 @@ resource "aws_instance" "psql" {
     "Name" = "pe-psql-${count.index}-${var.id}"
   }))
 
+  lifecycle {
+    ignore_changes = [tags["internalDNS"]]
+  }
+
   root_block_device {
     volume_size = var.database_disk
     volume_type = "gp2"
@@ -107,6 +136,10 @@ resource "aws_instance" "compiler" {
   tags                   = merge(local.tags, tomap({
     "Name" = "pe-compiler-${count.index}-${var.id}"
   }))
+
+  lifecycle {
+    ignore_changes = [tags["internalDNS"]]
+  }
 
   root_block_device {
     volume_size = var.compiler_disk
