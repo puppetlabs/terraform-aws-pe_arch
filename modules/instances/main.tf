@@ -39,6 +39,15 @@ locals {
     description = "PEADM Deployed Puppet Enterprise"
     project     = var.project
   }, var.tags)
+  servers = [ for i in flatten([
+    aws_instance.server[*],
+    aws_instance.psql[*],
+    aws_instance.compiler[*]
+  ]) :
+    [ i.id,
+    var.domain_name == null ? i.private_dns :
+    "${i.tags["Name"]}.${var.domain_name}" ]
+  ]
 }
 
 resource "aws_key_pair" "pe_adm" {
@@ -48,24 +57,12 @@ resource "aws_key_pair" "pe_adm" {
 }
 
 # Additional internalDNS depends on instances to be deployed to determine the
-# value of private_dns, instance resource ignore content of this tag
-resource "aws_ec2_tag" "server-dns" {
-  count       = length(aws_instance.server[*])
-  resource_id = aws_instance.server[count.index].id
+# value of private_dns, instance resources ignore content of this tag
+resource "aws_ec2_tag" "internalDNS" {
+  count       = length(local.servers)
+  resource_id = local.servers[count.index][0]
   key         = "internalDNS"
-  value       = var.domain_name == null ? aws_instance.server[count.index].private_dns : "pe-server-${count.index}-${var.id}.${var.domain_name}"
-}
-resource "aws_ec2_tag" "psql-dns" {
-  count       = length(aws_instance.psql[*])
-  resource_id = aws_instance.psql[count.index].id
-  key         = "internalDNS"
-  value       = var.domain_name == null ? aws_instance.psql[count.index].private_dns : "pe-psql-${count.index}-${var.id}.${var.domain_name}"
-}
-resource "aws_ec2_tag" "compiler-dns" {
-  count       = length(aws_instance.compiler[*])
-  resource_id = aws_instance.compiler[count.index].id
-  key         = "internalDNS"
-  value       = var.domain_name == null ? aws_instance.compiler[count.index].private_dns : "pe-compiler-${count.index}-${var.id}.${var.domain_name}"
+  value       = local.servers[count.index][1]
 }
 
 # In both large and standard we only require a single Primary but under a
