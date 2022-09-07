@@ -42,7 +42,8 @@ locals {
   servers = [ for i in flatten([
     aws_instance.server[*],
     aws_instance.psql[*],
-    aws_instance.compiler[*]
+    aws_instance.compiler[*],
+    aws_instance.node[*]
   ]) :
     [ i.id,
     var.domain_name == null ? i.private_dns :
@@ -156,6 +157,10 @@ resource "aws_instance" "node" {
   tags                   = merge(local.tags, tomap({
     "Name" = "pe-node-${count.index}-${var.id}"
   }))
+
+  lifecycle {
+    ignore_changes = [tags["internalDNS"]]
+  }
 
   root_block_device {
     volume_size = 15
