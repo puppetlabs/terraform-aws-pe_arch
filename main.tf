@@ -133,4 +133,5 @@ module "instances" {
   compiler_disk      = data.hiera5.compiler_disk.value
   primary_disk       = data.hiera5.primary_disk.value
   database_disk      = data.hiera5.database_disk.value
+  domain_name        = var.domain_name
 }

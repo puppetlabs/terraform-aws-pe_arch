@@ -85,3 +85,8 @@ variable "database_disk" {
   description = "Instance disk size of PuppetDB database and replica"
   type        = string
 }
+variable "domain_name" {
+  description = "Custom domain to use for internalDNS"
+  type        = string
+  default     = null
+}

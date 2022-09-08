@@ -39,12 +39,31 @@ locals {
     description = "PEADM Deployed Puppet Enterprise"
     project     = var.project
   }, var.tags)
+  servers = [ for i in flatten([
+    aws_instance.server[*],
+    aws_instance.psql[*],
+    aws_instance.compiler[*],
+    aws_instance.node[*]
+  ]) :
+    [ i.id,
+    var.domain_name == null ? i.private_dns :
+    "${i.tags["Name"]}.${var.domain_name}" ]
+  ]
 }
 
 resource "aws_key_pair" "pe_adm" {
   key_name   = "pe_adm_${var.id}"
   public_key = file(var.ssh_key)
   tags       = local.tags
+}
+
+# Additional internalDNS depends on instances to be deployed to determine the
+# value of private_dns, instance resources ignore content of this tag
+resource "aws_ec2_tag" "internalDNS" {
+  count       = length(local.servers)
+  resource_id = local.servers[count.index][0]
+  key         = "internalDNS"
+  value       = local.servers[count.index][1]
 }
 
 # In both large and standard we only require a single Primary but under a
@@ -60,6 +79,10 @@ resource "aws_instance" "server" {
   tags                   = merge(local.tags, tomap({
     "Name" = "pe-server-${count.index}-${var.id}"
   }))
+
+  lifecycle {
+    ignore_changes = [tags["internalDNS"]]
+  }
 
   root_block_device {
     volume_size = var.primary_disk
@@ -83,6 +106,10 @@ resource "aws_instance" "psql" {
   tags                   = merge(local.tags, tomap({
     "Name" = "pe-psql-${count.index}-${var.id}"
   }))
+
+  lifecycle {
+    ignore_changes = [tags["internalDNS"]]
+  }
 
   root_block_device {
     volume_size = var.database_disk
@@ -108,6 +135,10 @@ resource "aws_instance" "compiler" {
     "Name" = "pe-compiler-${count.index}-${var.id}"
   }))
 
+  lifecycle {
+    ignore_changes = [tags["internalDNS"]]
+  }
+
   root_block_device {
     volume_size = var.compiler_disk
     volume_type = "gp2"
@@ -126,6 +157,10 @@ resource "aws_instance" "node" {
   tags                   = merge(local.tags, tomap({
     "Name" = "pe-node-${count.index}-${var.id}"
   }))
+
+  lifecycle {
+    ignore_changes = [tags["internalDNS"]]
+  }
 
   root_block_device {
     volume_size = 15
