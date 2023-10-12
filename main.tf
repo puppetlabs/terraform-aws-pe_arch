@@ -8,7 +8,7 @@ terraform {
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "3.32.0"
+      version = "5.20.1"
     }
     random = {
       source  = "hashicorp/random"
@@ -28,7 +28,10 @@ provider "hiera5" {
 }
 
 provider "aws" {
-  region  = var.region
+  region = var.region
+  default_tags {
+    tags = var.tags
+  }
 }
 
 # hiera lookups
@@ -101,7 +104,6 @@ module "loadbalancer" {
   security_group_ids = module.networking.security_group_ids
   subnet_ids         = module.networking.subnet_ids
   project            = var.project
-  region             = var.region
   instances          = module.instances.compilers
   has_lb             = local.has_lb
   compiler_count     = local.compiler_count
